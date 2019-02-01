@@ -10,38 +10,104 @@ source("pass.R")
 ## user <- "..."
 ## passw <- "..."
 
+cat("Connecting to the server")
 dbhandleprogres <- odbcConnect(progres, uid=user, pwd=passw)
-
-query <- "SELECT  PP.ProcessingGroupNumber CaseNo,
-COUNT(DISTINCT II.IndividualGUID) Num_Inds,
-AVG(II.IndividualAge) AVG_Age,
-STDEV(II.IndividualAge) STDEV_Age,
-Count( CASE WHEN(II.IndividualAge < 15) THEN(II.IndividualGUID) ELSE(NULL) END) Child_0_14,
-Count( CASE WHEN(II.IndividualAge < 19 AND IndividualAge > 14) THEN(II.IndividualGUID) ELSE(NULL) END) Youth_15_17,
-Count( CASE WHEN(II.IndividualAge < 65 AND IndividualAge > 14) THEN(II.IndividualGUID) ELSE(NULL) END) Work_15_64,
-Count( CASE WHEN(II.IndividualAge > 64) THEN(II.IndividualGUID) ELSE(NULL) END) Eldern_65,
-Count( CASE WHEN(II.SexCode = 'M') THEN(SexCode) ELSE(NULL) END) Male,
-Count( CASE WHEN(II.SexCode = 'F') THEN(SexCode) ELSE(NULL) END) Female,
-Count( CASE WHEN(II.SexCode not in  ('F','M')) THEN('Empty')  END) NOGender,
-Count( CASE WHEN(IPGG.RelationshipToPrincipalRepresentative ='HUS' or IPGG.RelationshipToPrincipalRepresentative ='EXM' or IPGG.RelationshipToPrincipalRepresentative ='WIF'
-or IPGG.RelationshipToPrincipalRepresentative ='EXF' or IPGG.RelationshipToPrincipalRepresentative ='CLH' or IPGG.RelationshipToPrincipalRepresentative ='CLW') THEN(II.IndividualGUID) ELSE(NULL) END) couple,
-Count( CASE WHEN(IPGG.RelationshipToPrincipalRepresentative ='SCF' or IPGG.RelationshipToPrincipalRepresentative ='SCM' or IPGG.RelationshipToPrincipalRepresentative ='FCF'
-or IPGG.RelationshipToPrincipalRepresentative ='FCM' or IPGG.RelationshipToPrincipalRepresentative ='SON' or IPGG.RelationshipToPrincipalRepresentative ='DAU' and II.IndividualAge < 19) THEN(II.IndividualGUID) ELSE(NULL) END) minordependant
-
-FROM dbo.dataProcessGroup AS PP
-INNER JOIN dbo.dataIndividualProcessGroup AS IPGG ON PP.ProcessingGroupGUID = IPGG.ProcessingGroupGUID
-INNER JOIN dbo.dataIndividual AS II ON IPGG.IndividualGUID = II.IndividualGUID
-WHERE ProcessStatusCode IN('A') GROUP BY ProcessingGroupNumber"
+source("extract-query.R")
 
 ## fetching the view containing information aggregated at the case level and the event
+cat("Executing the summary table creation within proGres")
 progres.case <- sqlQuery(dbhandleprogres, query)
 
-main <- getwd()
+## fetching the view containing information aggregated at the case level and the event
+cat("Fetching table to apply prediction")
+progres.case <-  sqlFetch(dbhandleprogres, "caseprofile")
 
+## Now format the data so that compatible with what the model will ingest --
+
+
+
+
+####################################################################################################
+## Decision forest modeling
+####################################################################################################
+# install.packages("randomForest")
+library(randomForest)
+load("forest_model.rda")
+forest_prediction <- as.data.frame(predict(forest_model, newdata = prediction_df,
+                                           type = "prob",
+                                           overwrite = TRUE))
+
+names(forest_prediction) <- c("Forest_Probability_Class_0",
+                              "Forest_Probability_Class_1",
+                              "Forest_Probability_Class_2")
+forest_prediction$Forest_Prediction <- predict(forest_model, newdata = prediction_df)
+
+
+####################################################################################################
+## Stochastic Gradient Boosted Decision Trees modeling
+####################################################################################################
+# install.packages("gbm")
+library(gbm)
+load("boosted_model.rda")
+
+boosted_prediction <- predict(boosted_model, newdata = prediction_df,
+                                type = "prob",
+                                overwrite = TRUE)
+
+names(boosted_prediction) <- c("Boosted_Probability_Class_0",
+                               "Boosted_Probability_Class_1",
+                               "Boosted_Probability_Class_2")
+
+boosted_prediction$Boosted_Prediction <- predict(boosted_model, newdata = prediction_df)
+
+
+
+####################################################################################################
+## Neural network regression modeling
+####################################################################################################
+# install.packages("nnet")
+library(nnet)
+load("nnet_model.rda")
+nnet_prediction <- predict(object = nnet_model,
+                           newdata = prediction_df,
+                           type = "raw")
+nnet_prediction <- as.data.frame(nnet_prediction)
+names(nnet_prediction) <- c("Nnet_Probability_Class_0",
+                            "Nnet_Probability_Class_1",
+                            "Nnet_Probability_Class_2")
+
+nnet_prediction_response <- predict(object = nnet_model,
+                                    newdata = prediction_df,
+                                    type = "class")
+
+nnet_prediction_response <- as.data.frame(nnet_prediction_response)
+names(nnet_prediction_response) <- "Nnet_Prediction"
+nnet_prediction <- cbind(nnet_prediction, nnet_prediction_response)
+
+
+####################################################################################################
+## Multinomial modeling
+####################################################################################################
+# install.packages("nnet")
+library(nnet)
+load("multinomial_model.rda")
+mnet_prediction <- predict(object = multinomial_model,
+                           newdata = prediction_df,
+                           type = "prob")
+mnet_prediction <- as.data.frame(mnet_prediction)
+names(mnet_prediction) <- c("Multinomial_Probability_Class_0",
+                            "Multinomial_Probability_Class_1",
+                            "Multinomial_Probability_Class_2")
+
+mnet_prediction_response <- predict(object = multinomial_model, newdata = prediction_df)
+
+mnet_prediction_response <- as.data.frame(mnet_prediction_response)
+names(mnet_prediction_response) <- "Multinomial_Prediction"
+mnet_prediction <- cbind(mnet_prediction, mnet_prediction_response)
+
+
+
+cat("Saving Results")
+main <- getwd()
 write.csv(progres.case , paste0(main, "/progrescase-target", format(Sys.time(), "%m-%d-%Y"),".csv"))
 
-## Now format the data so that i can be compatiable with what the model will ingest --
-
-
-## Load and run the model
-#load("prioritisation.rda")
