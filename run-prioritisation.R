@@ -2,16 +2,16 @@
 library(RODBC)
 
 #########################################
-## Db handle for progres Data warehouse
+## Db handle for progres registration DB
 #########################################
 source("pass.R")
-## In a different file
+## Create a file name pass with credentials to log into the registration database
 # progres <- "..." ## Name of the ODBC connection to the DB - needs to be created before
-## user <- "..."
+## user <- "..."  ### Advised to use a read-only user
 ## passw <- "..."
 
 cat("Connecting to the server")
-dbhandleprogres <- odbcConnect(progres, uid=user, pwd=passw)
+dbhandleprogres <- odbcConnect(progres, uid = user, pwd = passw)
 source("extract-query.R")
 
 ## fetching the view containing information aggregated at the case level and the event

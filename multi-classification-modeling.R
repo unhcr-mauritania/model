@@ -79,7 +79,7 @@ evaluate_model <- function(observed, predicted) {
 
 
 ####################################################################################################
-## Decision forest modeling
+## Random Decision forest modeling
 ####################################################################################################
 # install.packages("randomForest")
 library(randomForest)
