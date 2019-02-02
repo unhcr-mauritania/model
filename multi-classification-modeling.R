@@ -9,54 +9,39 @@
 ## 3. Multinomial modeling;
 ## 4. Neural network
 
+
+## Th Objective is to predict between 3 classes for variable unconditionnal2
+## "full.allocation",
+## "no.allocation",
+## "reduced.allocation"
+
+
 ####################################################################################################
 ####################################################################################################
 ## Extract registry
 ####################################################################################################
+source("get_data_from_db.R")
 
-#install.packages("RODBC")
-library(RODBC)
+####################################################################################################
+## Feature engineering to reduce number of modalities for good classification
+####################################################################################################
+## This may need to be adjusted depending on the specific context
 
-#########################################
-## Db handle for progres Data warehouse
-#########################################
-source("pass.R")
-## In a different file
-# progres <- "..." ## Name of the ODBC connection to the DB - needs to be created before
-## user <- "..."
-## passw <- "..."
+source("feature.R")
 
-cat("Connecting to the server")
-dbhandleprogres <- odbcConnect(progres, uid=user, pwd=passw)
-source("extract-query.R")
 
-## fetching the view containing information aggregated at the case level and the event
-cat("Executing the summary table creation within proGres")
-dependency <- sqlQuery(dbhandleprogres, query1)
-capacity <- sqlQuery(dbhandleprogres, query2)
-specificneeds <- sqlQuery(dbhandleprogres, query3)
-
-cases <- merge( x = dependency, y = capacity, by = "CaseNo" )
-
-## install.packages("reshape2")
-library(reshape2)
-specificneeds2 <- dcast(specificneeds,CaseNo ~  SPNeeds, value.var = "CaseNo", fun.aggregate = lenght )
-
-cases <- merge( x = cases, y = specificneeds2, by = "CaseNo", all.x = TRUE )
-
-## clean
-rm(dependency, capacity, specificneeds, specificneeds2,
-   passw, user, progres, dbhandleprogres,
-   query1, query2, query3)
 ####################################################################################################
 ## Join with Survey
 ####################################################################################################
-cat("Joining on table from survey with observed vulnerability category")
+cat("Joining on table from survey with observed vulnerability category. \n")
 
 train <- read.csv("train.csv")
 
 ## Targeting on phase2
-train_table <-  merge(x = cases, y = train , by = "CaseNo", all.y = TRUE)
+train_table <-  merge(x = cases2, y = train[ , c("CaseNo", "unconditionnal2")] , by = "CaseNo", all.y = TRUE)
+
+row.names(train_table) <- train_table$CaseNo
+train_table$CaseNo <- NULL
 
 ## Convert all character variable into factor in one line:
 library(dplyr)
@@ -66,8 +51,6 @@ train_table <- train_table %>% mutate_if(is.integer, as.factor)
 
 train_table_na <- train_table[, colSums(is.na(train_table)) == 0]
 #str(train_table_na)
-
-
 
 prediction_df <- train_table_na
 
@@ -113,10 +96,9 @@ evaluate_model <- function(observed, predicted) {
 ## Random Decision forest modeling
 ####################################################################################################
 # install.packages("randomForest")
+cat("Joining on table from survey with observed vulnerability category. \n")
+
 library(randomForest)
-
-
-
 forest_model <- randomForest(unconditionnal2 ~ ., data = train_table_na,
                              nTree = 8,
                              maxDepth = 32,
@@ -125,15 +107,15 @@ forest_model <- randomForest(unconditionnal2 ~ ., data = train_table_na,
 ## save this model
 save(forest_model, file = "forest_model.rda")
 
-
+#load("forest_model.rda")
 
 forest_prediction <- as.data.frame(predict(forest_model, newdata = prediction_df,
                                            type = "prob",
                                            overwrite = TRUE))
 
-names(forest_prediction) <- c("Forest_Probability_Class_0",
-                              "Forest_Probability_Class_1",
-                              "Forest_Probability_Class_2")
+names(forest_prediction) <- c("full.allocation",
+                              "no.allocation",
+                              "reduced.allocation")
 forest_prediction$Forest_Prediction <- predict(forest_model, newdata = prediction_df)
 
 forest_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
@@ -142,30 +124,31 @@ forest_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 ## Stochastic Gradient Boosted Decision Trees modeling
 ####################################################################################################
 # install.packages("gbm")
+cat("Joining on table from survey with observed vulnerability category. \n")
+
 library(gbm)
 boosted_model <- gbm(unconditionnal2 ~ ., data = train_table_na,
-                     distribution = "gaussian",
-                     n.trees = 10000,
-                     shrinkage = 0.01,
-                     interaction.depth = 4)
+                     distribution='multinomial',
+                     n.trees=200,
+                     interaction.depth=4,
+                     shrinkage=0.005)
 ## save this model
 save(boosted_model, file = "boosted_model.rda")
 
+# load("boosted_model.rda")
+
 boosted_prediction <- predict(boosted_model, newdata = prediction_df,
-                              n.trees = 10000,
-                              type = "response",
-                              overwrite = TRUE)
+                              n.trees = 200,type='response')
+boosted_prediction <- as.data.frame(boosted_prediction)
+#levels(train_table_na$unconditionnal2)
+names(boosted_prediction) <- c("full.allocation",
+                               "no.allocation",
+                               "reduced.allocation")
 
-boosted_prediction2 <- predict(boosted_model, newdata = prediction_df,
-                               n.trees = 10000,
-                               type = "link",
-                               overwrite = TRUE)
-
-names(boosted_prediction) <- c("Boosted_Probability_Class_0",
-                               "Boosted_Probability_Class_1",
-                               "Boosted_Probability_Class_2")
-
-#boosted_prediction$Boosted_Prediction <- predict(boosted_model, newdata = prediction_df)
+boosted_prediction$Boosted_Prediction <- apply(boosted_prediction, 1, which.max)
+boosted_prediction$Boosted_Prediction2 <- ifelse(boosted_prediction$Boosted_Prediction == 1, "full.allocation",
+                                                 ifelse(boosted_prediction$Boosted_Prediction == 2, "no.allocation",
+                                                        "reduced.allocation"))
 
 boosted_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
                                   predicted = boosted_prediction$Boosted_Prediction)
@@ -173,45 +156,64 @@ boosted_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 ## Multinomial modeling
 ####################################################################################################
 # install.packages("nnet")
+cat("Multinomial modeling. \n")
 library(nnet)
 
-multinomial_model <- multinom(unconditionnal2 ~ ., data = train_table, MaxNWts = 100000)
+multinomial_model <- multinom(unconditionnal2 ~ ., data = train_table_na)
 
-## Stepwsise variable selection
-multinomial_modelstep <- step(multinomial_model, trace = 0)
 
 ## save this model
 save(multinomial_model, file = "multinomial_model.rda")
-save(multinomial_modelstep, file = "multinomial_modelstep.rda")
 
-mnet_prediction <- predict(object = multinomial_model,
-                           newdata = prediction_df,
-                           type = "prob")
-mnet_prediction <- as.data.frame(mnet_prediction)
-names(mnet_prediction) <- c("Multinomial_Probability_Class_0",
-                            "Multinomial_Probability_Class_1",
-                            "Multinomial_Probability_Class_2")
+#load("multinomial_model.rda")
+multinomial_prediction <- predict(object = multinomial_model,
+                                  newdata = prediction_df,
+                                  type = "prob")
+multinomial_prediction <- as.data.frame(multinomial_prediction)
+names(multinomial_prediction) <- c("full.allocation",
+                                   "no.allocation",
+                                   "reduced.allocation")
 
-mnet_prediction_response <- predict(object = multinomial_model, newdata = prediction_df)
+multinomial_prediction$Multinomial_Prediction <- predict(object = multinomial_model, newdata = prediction_df)
 
-mnet_prediction_response <- as.data.frame(mnet_prediction_response)
-names(mnet_prediction_response) <- "Multinomial_Prediction"
-mnet_prediction <- cbind(mnet_prediction, mnet_prediction_response)
 
 multinomial_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
-                                      predicted = mnet_prediction$Multinomial_Prediction)
+                                      predicted = multinomial_prediction$Multinomial_Prediction)
+
+
+cat("Stepwise model. \n")
+## Stepwsise variable selection
+multinomialstep_model <- step(multinomial_model, trace = 0)
+save(multinomialstep_model, file = "multinomialstep_model.rda")
+
+#load("multinomialstep_model.rda")
+multinomialstep_prediction <- predict(object = multinomialstep_model,
+                                      newdata = prediction_df,
+                                      type = "prob")
+multinomialstep_prediction <- as.data.frame(multinomialstep_prediction)
+names(multinomialstep_prediction) <- c("full.allocation",
+                                       "no.allocation",
+                                       "reduced.allocation")
+
+multinomialstep_prediction$Multinomialstep_Prediction <- predict(object = multinomialstep_model, newdata = prediction_df)
+
+multinomialstep_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
+                                          predicted = multinomialstep_prediction$Multinomialstep_Prediction)
+
 ####################################################################################################
 ## Neural network regression modeling
 ####################################################################################################
 # install.packages("nnet")
+cat("Neural network regression modeling. \n")
 library(nnet)
 
 #nodes <- 10
 #weights <- nodes * (35 + 3) + nodes + 3
 
-nnet_model <- nnet(unconditionnal2 ~ ., data = train_table,
+nnet_model <- nnet(unconditionnal2 ~ ., data = train_table_na,
                    ### Wts = rep(0.1, weights),
-                   size = nodes,
+                   ##  size = nodes,
+                   size = 25,
                    decay = 0.005,
                    maxit = 100,
                    ## MaxNWts = weights),
@@ -219,14 +221,16 @@ nnet_model <- nnet(unconditionnal2 ~ ., data = train_table,
 ## save this model
 save(nnet_model, file = "nnet_model.rda")
 
+# load("nnet_model.rda")
+
 ## Prediction
 nnet_prediction <- predict(object = nnet_model,
                            newdata = prediction_df,
                            type = "raw")
 nnet_prediction <- as.data.frame(nnet_prediction)
-names(nnet_prediction) <- c("Nnet_Probability_Class_0",
-                            "Nnet_Probability_Class_1",
-                            "Nnet_Probability_Class_2")
+names(nnet_prediction) <- c("full.allocation",
+                            "no.allocation",
+                            "reduced.allocation")
 
 nnet_prediction_response <- predict(object = nnet_model,
                                     newdata = prediction_df,
@@ -240,24 +244,34 @@ nnet_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 ####################################################################################################
 ## Combine and save metrics
 ####################################################################################################
+cat("Combine and save metrics. \n")
+
 main <- getwd()
 
 predictions <- cbind(prediction_df$unconditionnal2, forest_prediction,
-                     boosted_prediction, mnet_prediction, nnet_prediction)
+                     boosted_prediction,
+                     multinomial_prediction,
+                     multinomialstep_prediction,
+                     nnet_prediction)
 
 
 write.csv(predictions , paste0(main, "/predictions", format(Sys.time(), "%m-%d-%Y"),".csv"))
 
 
-metrics_df <- rbind(forest_metrics, boosted_metrics, multinomial_metrics, nnet_metrics)
+metrics_df <- rbind(forest_metrics,
+                    boosted_metrics,
+                    multinomial_metrics,
+                    multinomialstep_metrics,
+                    nnet_metrics)
 metrics_df <- as.data.frame(metrics_df)
 rownames(metrics_df) <- NULL
-Algorithms <- c("Decision Forest",
+Algorithms <- c("Random Decision Forest",
                 "Boosted Decision Tree",
-                "Multinomial",
+                "Multinomial Regression",
+                "Multinomial Step Regression",
                 "Neural Network")
 metrics_df <- cbind(Algorithms, metrics_df)
-
+metrics_df
 write.csv(metrics_df , paste0(main, "/metrics_df", format(Sys.time(), "%m-%d-%Y"),".csv"))
 
-rm(list = ls())
+#rm(list = ls())

@@ -2,9 +2,9 @@
 
 This project allows to run an assistance targeting categorisation.
 
-The model is trained through the result of a vulnerability survey using measurement of food security that is merged with registration information `multi-classification-modeling.R`.
+The information pulled out from the registration database through `get_data_from_db.R`. Data are then reshapped to prevent imbalances within each modalities of the selected variable. This is done in `feature.R`.
 
-The information pulled out from the registration database is reshapped to prevent imbalences within each modalities of the selected variable. This is done in `feature.R`.
+The result of a vulnerability survey using measurement of food security is then merged with registration information. In the next step, different models are trained through  `multi-classification-modeling.R`.
 
 The following algorithms are used and compared to generate prediction: 
 

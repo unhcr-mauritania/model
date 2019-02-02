@@ -15,7 +15,7 @@ prop.table(table(cases$familyprofile, useNA = "ifany"))
 prop.table(table(as.factor(cases$Num_Inds), useNA = "ifany"))
 prop.table(table(cut(cases$Num_Inds,   breaks = c(0,1,2,3,4,6,50),include.lowest = TRUE)))
 #rm(Case.size)
-cases$Case.size <- cut(cases$Num_Inds, 
+cases$Case.size <- cut(cases$Num_Inds,
                        breaks = c(0,1,2,3,4,6,50),
                        labels = c("Case.size.1", "Case.size.2", "Case.size.3", "Case.size.4",
                                   "Case.size.5", "Case.size.6.or.more"),include.lowest = TRUE)
@@ -45,7 +45,7 @@ prop.table(table(cases$female.ratio, useNA = "ifany"))
 
 
 ####################################################################################################
-## Extracting main ocupation category from occupation code 
+## Extracting main ocupation category from occupation code
 prop.table(table(cases$dem_marriage, useNA = "ifany"))
 cases$dem_marriagecat <- as.character(cases$dem_marriage)
 cases$dem_marriagecat[cases$dem_marriagecat == "WD"] <- "Widowed"
@@ -63,8 +63,8 @@ prop.table(table(cases$dem_marriagecat, useNA = "ifany"))
 ## Adding Age cohort of PA
 cases$agecohort <- cut(cases$dem_age,c(0,18,25,35,45,59,Inf))
 prop.table(table(cases$agecohort, useNA = "ifany"))
-##Eliminating ifany records where PA has no age 
-cases <- cases[!is.na(cases$agecohort), ] 
+##Eliminating ifany records where PA has no age
+cases <- cases[!is.na(cases$agecohort), ]
 
 ### Arrival year
 
@@ -82,16 +82,16 @@ prop.table(table(cases$edu_highest, useNA = "ifany"))
 cases$educat <- as.character(cases$edu_highest)
 cases$educat[cases$educat == "KG"] <- "Formal Education" # "Kindergarten"
 cases$educat[cases$educat == "01"] <- "Formal Education" # "Grade 1"
-cases$educat[cases$educat == "02"] <- "Formal Education" # "Grade 2"  
+cases$educat[cases$educat == "02"] <- "Formal Education" # "Grade 2"
 cases$educat[cases$educat == "03"] <- "Formal Education" # "Up to Grade 5" # "Grade 3"
 cases$educat[cases$educat == "04"] <- "Formal Education" #"Up to Grade 5" # "Grade 4"
-cases$educat[cases$educat == "05"] <- "Formal Education" #"Up to Grade 5" # "Grade 5"  
+cases$educat[cases$educat == "05"] <- "Formal Education" #"Up to Grade 5" # "Grade 5"
 cases$educat[cases$educat == "06"] <- "Formal Education" #"Grade 6-8" # "Grade 6"
 cases$educat[cases$educat == "07"] <- "Formal Education" #"Grade 6-8" # "Grade 7"
 cases$educat[cases$educat == "08"] <- "Formal Education" #"Grade 6-8" # "Grade 8"
 cases$educat[cases$educat == "09"] <- "Formal Education" #"Grade 9-11" # "Grade 9"
 cases$educat[cases$educat == "10"] <- "Formal Education" #"Grade 9-11" #"Grade 10"
-cases$educat[cases$educat == "11"] <- "Formal Education" #"Grade 9-11" #"Grade 11" 
+cases$educat[cases$educat == "11"] <- "Formal Education" #"Grade 9-11" #"Grade 11"
 cases$educat[cases$educat == "12"] <- "Formal Education" #"Grade 12-14" #"Grade 12"
 cases$educat[cases$educat == "13"] <- "Formal Education" #"Grade 12-14" #"Grade 13"
 cases$educat[cases$educat == "14"] <- "Formal Education" #"Grade 12-14" #"Grade 14"
@@ -106,7 +106,7 @@ cases$educat <- as.factor(cases$educat)
 prop.table(table(cases$educat, useNA = "ifany"))
 
 ####################################################################################################
-## Extracting main ocupation category from occupation code 
+## Extracting main ocupation category from occupation code
 
 cases$occupationcat <- "Student.or.NoOccup.or.Unknownp"
 #cases$occupationcat[cases$occupationcode ==  "0001"] <- "Military"
@@ -137,14 +137,14 @@ cases$occupationcat[substr(cases$occupationcode, 1,1 )== "9"] <- "Agricultural.C
 
 
 cases$occupationcat <- factor(cases$occupationcat, levels = c("Qualified", "ServiceMarket",
-                                                              "Agricultural.Craft.Machine", 
+                                                              "Agricultural.Craft.Machine",
                                                               "Student.or.NoOccup.or.Unknownp"))
 prop.table(table(cases$occupationcat, useNA = "ifany"))
 
 
 ####################################################################################################
-## Occurence of specific needs 
-#  "SPNeeds",  "HasSPNeed" # ,                     
+## Occurence of specific needs
+#  "SPNeeds",  "HasSPNeed" # ,
 ## Child at risk
 cases$Child.at.risk <- ifelse(cases$`CR-AF` > 0 |
                                 cases$`CR-CC` > 0 |
@@ -210,37 +210,37 @@ prop.table(table(cases$single.parent, useNA = "ifany"))
 
 
 ####################################################################################################
-## Subset data ready for analysis 
-cases2 <- cases[ ,c ("CaseNo", 
-                     
-                     ## Featured characteristics 
-                     "familyprofile",                  
-                     "Case.size",                      
-                     "dependency" ,                    
-                     "female.ratio",                   
-                     "dem_marriagecat" ,               
-                     "agecohort",                      
-                     "YearArrivalCat" ,                
-                     "educat"  ,                       
-                     "occupationcat" ,                 
-                     "Child.at.risk",                  
-                     "Disabled",                       
-                     "Elder",                          
-                     "Single.Child" ,                  
-                     "Serious.medical.needs",          
-                     "single.parent" , 
-                     
+## Subset data ready for analysis
+cases2 <- cases[ ,c ("CaseNo",
+
+                     ## Featured characteristics
+                     "familyprofile",
+                     "Case.size",
+                     "dependency" ,
+                     "female.ratio",
+                     "dem_marriagecat" ,
+                     "agecohort",
+                     "YearArrivalCat" ,
+                     "educat"  ,
+                     "occupationcat" ,
+                     "Child.at.risk",
+                     "Disabled",
+                     "Elder",
+                     "Single.Child" ,
+                     "Serious.medical.needs",
+                     "single.parent" ,
+
                      #"coal5id",
-                     
-                     
+
+
                      ## Socio-Eco - Data
                      "ProcessingGroupNumberSoftfield1", "ProcessingGroupNumberSoftfield2",
-                     "ProcessingGroupNumberSoftfield3", "ProcessingGroupNumberSoftfield4", 
-                     
+                     "ProcessingGroupNumberSoftfield3", "ProcessingGroupNumberSoftfield4",
+
                      "ProcessingGroupFlagSoftfield1" ,   "ProcessingGroupFlagSoftfield2",
-                     "ProcessingGroupFlagSoftfield3" ,  "ProcessingGroupFlagSoftfield4",  
-                     "ProcessingGroupFlagSoftfield5",   "ProcessingGroupFlagSoftfield6", 
-                     
+                     "ProcessingGroupFlagSoftfield3" ,  "ProcessingGroupFlagSoftfield4",
+                     "ProcessingGroupFlagSoftfield5",   "ProcessingGroupFlagSoftfield6",
+
                      "ProcessingGroupCodeSoftfield1"  ,  "ProcessingGroupCodeSoftfield2",
                      "ProcessingGroupCodeSoftfield3" ,  "ProcessingGroupCodeSoftfield4",
                      "ProcessingGroupCodeSoftfield5"
