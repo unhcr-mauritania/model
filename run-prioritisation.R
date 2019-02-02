@@ -10,20 +10,40 @@ source("pass.R")
 ## user <- "..."  ### Advised to use a read-only user
 ## passw <- "..."
 
+#install.packages("RODBC")
+library(RODBC)
+
+#########################################
+## Db handle for progres Data warehouse
+#########################################
+source("pass.R")
+## In a different file
+# progres <- "..." ## Name of the ODBC connection to the DB - needs to be created before
+## user <- "..."
+## passw <- "..."
+
 cat("Connecting to the server")
 dbhandleprogres <- odbcConnect(progres, uid = user, pwd = passw)
 source("extract-query.R")
 
 ## fetching the view containing information aggregated at the case level and the event
 cat("Executing the summary table creation within proGres")
-progres.case <- sqlQuery(dbhandleprogres, query)
+dependency <- sqlQuery(dbhandleprogres, query1)
+capacity <- sqlQuery(dbhandleprogres, query2)
+specificneeds <- sqlQuery(dbhandleprogres, query3)
 
-## fetching the view containing information aggregated at the case level and the event
-cat("Fetching table to apply prediction")
-progres.case <-  sqlFetch(dbhandleprogres, "caseprofile")
+prediction_df <- merge( x = dependency, y = capacity, by = "CaseNo" )
 
-## Now format the data so that compatible with what the model will ingest --
+## install.packages("reshape2")
+library(reshape2)
+specificneeds2 <- dcast(specificneeds,CaseNo ~  SPNeeds, value.var = "CaseNo", fun.aggregate = lenght )
 
+prediction_df <- merge( x = cases, y = specificneeds2, by = "CaseNo", all.x = TRUE )
+
+## Clean
+rm(dependency, capacity, specificneeds, specificneeds2,
+   passw, user, progres, dbhandleprogres,
+   query1, query2, query3)
 
 
 
