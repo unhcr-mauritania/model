@@ -61,6 +61,15 @@ train_table <-  merge(x = cases, y = train , by = "CaseNo", all.y = TRUE)
 ## Convert all character variable into factor in one line:
 library(dplyr)
 train_table <- train_table %>% mutate_if(is.character, as.factor)
+train_table <- train_table %>% mutate_if(is.integer, as.factor)
+#str(train_table)
+
+train_table_na <- train_table[, colSums(is.na(train_table)) == 0]
+#str(train_table_na)
+
+
+
+prediction_df <- train_table_na
 
 ####################################################################################################
 ## Mulit-classification model evaluation metrics
@@ -106,22 +115,21 @@ evaluate_model <- function(observed, predicted) {
 # install.packages("randomForest")
 library(randomForest)
 
-train_table_na <- train_table[, colSums(is.na(train_table)) == 0]
-prediction_df <- train_table_na
+
 
 forest_model <- randomForest(unconditionnal2 ~ ., data = train_table_na,
-                          nTree = 8,
-                          maxDepth = 32,
-                          mTry = 35,
-                          seed = 5)
+                             nTree = 8,
+                             maxDepth = 32,
+                             mTry = 35,
+                             seed = 5)
 ## save this model
 save(forest_model, file = "forest_model.rda")
 
 
 
 forest_prediction <- as.data.frame(predict(forest_model, newdata = prediction_df,
-                               type = "prob",
-                               overwrite = TRUE))
+                                           type = "prob",
+                                           overwrite = TRUE))
 
 names(forest_prediction) <- c("Forest_Probability_Class_0",
                               "Forest_Probability_Class_1",
@@ -136,22 +144,28 @@ forest_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 # install.packages("gbm")
 library(gbm)
 boosted_model <- gbm(unconditionnal2 ~ ., data = train_table_na,
-                       distribution = "gaussian",
-                       n.trees = 10000,
-                       shrinkage = 0.01,
-                       interaction.depth = 4)
+                     distribution = "gaussian",
+                     n.trees = 10000,
+                     shrinkage = 0.01,
+                     interaction.depth = 4)
 ## save this model
 save(boosted_model, file = "boosted_model.rda")
 
 boosted_prediction <- predict(boosted_model, newdata = prediction_df,
-                                type = "prob",
-                                overwrite = TRUE)
+                              n.trees = 10000,
+                              type = "response",
+                              overwrite = TRUE)
+
+boosted_prediction2 <- predict(boosted_model, newdata = prediction_df,
+                               n.trees = 10000,
+                               type = "link",
+                               overwrite = TRUE)
 
 names(boosted_prediction) <- c("Boosted_Probability_Class_0",
                                "Boosted_Probability_Class_1",
                                "Boosted_Probability_Class_2")
 
-boosted_prediction$Boosted_Prediction <- predict(boosted_model, newdata = prediction_df)
+#boosted_prediction$Boosted_Prediction <- predict(boosted_model, newdata = prediction_df)
 
 boosted_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
                                   predicted = boosted_prediction$Boosted_Prediction)
@@ -161,7 +175,7 @@ boosted_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 # install.packages("nnet")
 library(nnet)
 
-multinomial_model <- multinom(unconditionnal2 ~ ., data = train_table)
+multinomial_model <- multinom(unconditionnal2 ~ ., data = train_table, MaxNWts = 100000)
 
 ## Stepwsise variable selection
 multinomial_modelstep <- step(multinomial_model, trace = 0)
@@ -192,16 +206,16 @@ multinomial_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 # install.packages("nnet")
 library(nnet)
 
-nodes <- 10
-weights <- nodes * (35 + 3) + nodes + 3
+#nodes <- 10
+#weights <- nodes * (35 + 3) + nodes + 3
 
-nnet_model <- nnet(formula = formula,
-                   data = train_df,
-                   Wts = rep(0.1, weights),
+nnet_model <- nnet(unconditionnal2 ~ ., data = train_table,
+                   ### Wts = rep(0.1, weights),
                    size = nodes,
                    decay = 0.005,
                    maxit = 100,
-                   MaxNWts = weights)
+                   ## MaxNWts = weights),
+                   MaxNWts = 100000)
 ## save this model
 save(nnet_model, file = "nnet_model.rda")
 
