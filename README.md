@@ -45,7 +45,7 @@ A reproducible report (using [Rmd](https://www.rstudio.com/wp-content/uploads/20
 >               FROM yourtable 
 >               GROUP BY ProcessingGroupNumber "
 
-3. Pull data from this database into the R session using the sqlQuery function in order to create the corresponding data frame . You will need to add a line around line 24 in `get_data_from_db.R`. (in this example below, we call it `newpredictor`) 
+3. Pull data from this database into the R session using the sqlQuery function in order to create the corresponding data frame . You will need to add a line around line 24 in `get_data_from_db.R`. (in this example below, we call it `newpredictor`). You will need to have [configured your ODBC connection](https://www.techwalla.com/articles/how-to-create-and-setup-an-odbc-database-connection) and set up your passord file `pass.R` before. 
 
 > newpredictor <- sqlQuery(dbhandleprogres, query.new)
 
@@ -89,6 +89,6 @@ The last step is to retain your engineered variable in cases2 by adding it in th
 >
 >                 )]
 
-6. Rebuild the prediction model and check their respective accuracy `multi-classification-modeling.R` -- depending on your computer, be warned that this can take some time....
+6. Rebuild the prediction model and check their respective accuracy `multi-classification-modeling.R` -- depending on your computer, be warned that this can take some time.... For this, you will need the file train.csv
 
-7. Adjust the prediction script `run-prioritisation.R` that feed the masterlist generation together with the report 
+7. Adjust the prediction script `run-prioritisation.R` that feed the masterlist `progrescase-last.csv` generation together with the report `Prioritisation-report.Rmd`
