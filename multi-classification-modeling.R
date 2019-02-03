@@ -10,7 +10,7 @@
 ## 4. Neural network
 
 
-## Th Objective is to predict between 3 classes for variable unconditionnal2
+## The Objective is to predict between 3 classes for variable unconditionnal2
 ## "full.allocation",
 ## "no.allocation",
 ## "reduced.allocation"

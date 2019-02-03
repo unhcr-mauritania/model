@@ -21,15 +21,17 @@ dependency <- sqlQuery(dbhandleprogres, query1)
 capacity <- sqlQuery(dbhandleprogres, query2)
 specificneeds <- sqlQuery(dbhandleprogres, query3)
 
+
+## No
 cases <- merge( x = dependency, y = capacity, by = "CaseNo" )
 
 ## install.packages("reshape2")
 library(reshape2)
-specificneeds2 <- dcast(specificneeds, CaseNo ~  SPNeeds, value.var = "CaseNo" )
+specificneeds.wide <- dcast(specificneeds, CaseNo ~  SPNeeds, value.var = "CaseNo" )
 
-cases <- merge( x = cases, y = specificneeds2, by = "CaseNo", all.x = TRUE )
+cases <- merge( x = cases, y = specificneeds.wide, by = "CaseNo", all.x = TRUE )
 
-## clean folder 
-rm(dependency, capacity, specificneeds, specificneeds2,
+## clean folder
+rm(dependency, capacity, specificneeds, specificneeds.wide,
    passw, user, progres, dbhandleprogres,
    query1, query2, query3)
