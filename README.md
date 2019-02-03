@@ -1,13 +1,15 @@
-# Modeling Assistance Prioritisation with Machine learning
+# Modeling Assistance Prioritisation
 
 This project allows to run an assistance targeting categorisation.
 
-The different categories were defined based on the profiling study (**Who?**) and the result of the strategic discussion on targeting (**What?**) and allow to address the question on **How?** assistance will be delivered.
+The different categories were defined based on the profiling study (**Who?**) and the result of the strategic discussion on targeting (**What?**) and allow to address the question on **How** assistance will be delivered.
 
-The categories are the one for prioritisation and are applied on the observation from a survey: 
+This specific project focus on situation where 3 prioritisation categories are defined: 
  * "full.allocation",
  * "reduced.allocation",
  * "no.allocation"
+
+The categories are built from a series of variables collected through a sample-based survey. The objective is to be able to categorise the full population that is registered. The variable to predict comes from the survey while the predictors are the variable collected at registration level.
 
 ## Walk-through
 
