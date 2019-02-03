@@ -91,7 +91,7 @@ Subset data ready for analysis
 >
 >                 )]
 
-6. Rebuild the prediction model and check their respective accuracy `multi-classification-modeling.R` -- depending on your computer, be warned that this can take some time.... For this, you will need the file train.csv
+6. Rebuild the prediction model and check their respective accuracy `multi-classification-modeling.R` -- depending on your computer, be warned that this can take some time.... For this, you will need the file `train.csv` where you should have a variable `CaseNo` in order to do the join.
 
 7. Adjust the prediction script `run-prioritisation.R` that feed the masterlist `progrescase-last.csv` generation together with the report `Prioritisation-report.Rmd`
 
