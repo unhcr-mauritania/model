@@ -207,6 +207,28 @@ cases$single.parent <- ifelse(cases$`SP-CG` > 0 |
 cases$single.parent[is.na(cases$single.parent)] <- "no"
 prop.table(table(cases$single.parent, useNA = "ifany"))
 
+####################################################################################################
+## Extracting Number of times of HHs absentees GFD
+table(cases$AST36, useNA = "ifany")
+table(cases$AST36, useNA = "ifany")
+prop.table(table(cases$AST36, useNA = "ifany"))
+
+cases$AbsenteesGFD2 <- as.numeric(cases$AST36)
+cases$AbsenteesGFD2[is.na(cases$AST36)] <- "0"
+prop.table(table(cases$AbsenteesGFD2, useNA = "ifany"))
+
+cases$AbsenteesGFD2 <- as.numeric(cases$AbsenteesGFD2)
+str(cases$AbsenteesGFD2)
+
+hist(cases$AbsenteesGFD2)
+
+cases$AbsenteesGFD2.discrete <- cut(cases$AbsenteesGFD2,
+                                    breaks = c(-1, 0, 1, 60),
+                                    labels = c("Regular.0", "almost.Regular.1", "No.Regular.2.or.more"),
+                                    include.lowest = TRUE)
+
+#cases$AbsenteesGFD2 <- as.factor(cases$AbsenteesGFD2.discrete)
+prop.table(table(cases$AbsenteesGFD2.discrete, useNA = "ifany"))
 
 
 ####################################################################################################
@@ -243,5 +265,6 @@ cases2 <- cases[ ,c ("CaseNo",
 
                      "ProcessingGroupCodeSoftfield1"  ,  "ProcessingGroupCodeSoftfield2",
                      "ProcessingGroupCodeSoftfield3" ,  "ProcessingGroupCodeSoftfield4",
-                     "ProcessingGroupCodeSoftfield5"
+                     "ProcessingGroupCodeSoftfield5",
+                     "AbsenteesGFD2.discrete"
 )]

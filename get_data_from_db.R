@@ -20,7 +20,9 @@ cat("Executing the summary table creation within proGres. \n")
 dependency <- sqlQuery(dbhandleprogres, query1)
 capacity <- sqlQuery(dbhandleprogres, query2)
 specificneeds <- sqlQuery(dbhandleprogres, query3)
+AbsenteesGFD <- sqlQuery(dbhandleprogres, query4)
 
+names (AbsenteesGFD)
 cases <- merge( x = dependency, y = capacity, by = "CaseNo" )
 
 ## install.packages("reshape2")
@@ -29,7 +31,12 @@ specificneeds2 <- dcast(specificneeds, CaseNo ~  SPNeeds, value.var = "CaseNo" )
 
 cases <- merge( x = cases, y = specificneeds2, by = "CaseNo", all.x = TRUE )
 
+library(reshape2)
+AbsenteesGFD2 <- dcast(AbsenteesGFD, CaseNo ~  EventID, value.var = "CaseNo" )
+
+cases <- merge( x = cases, y = AbsenteesGFD2, by = "CaseNo", all.x = TRUE )
+
 ## clean folder 
 rm(dependency, capacity, specificneeds, specificneeds2,
    passw, user, progres, dbhandleprogres,
-   query1, query2, query3)
+   query1, query2, query3, query4)

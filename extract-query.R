@@ -81,3 +81,10 @@ INNER JOIN dbo.dataIndividual AS II ON I.IndividualGUID = II.IndividualGUID
 INNER JOIN dbo.dataIndividualProcessGroup AS IPG ON IPG.IndividualGUID = II.IndividualGUID
 INNER JOIN dbo.dataProcessGroup AS P  ON P.ProcessingGroupGUID = IPG.ProcessingGroupGUID
 WHERE I.VulnerabilityActive = 1"
+
+## Query 4: Information on absentees during GFD
+query4 <- "SELECT dataProcessGroup.ProcessingGroupNumber  CaseNo,
+ dataEventLog.EventID, dataEventLog.EventLogstatus, dataEventLog.Comments
+FROM  dataEventLog INNER JOIN
+dataProcessGroup ON dataEventLog.ProcessingGroupGUID = dataProcessGroup.ProcessingGroupGUID
+WHERE (dataEventLog.EventID = N'AST36') AND (dataEventLog.EventLogstatus = N'c')"
