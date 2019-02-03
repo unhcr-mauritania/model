@@ -9,11 +9,9 @@ The categories are the one for prioritisation and are applied on the observation
  * "reduced.allocation",
  * "no.allocation"
 
-## Walk through
+## Walk-through
 
-The information pulled out from the registration database through `get_data_from_db.R`. Note an ODBC connection to the SQl server is required: this can be set-up through the specific windows utilitiy
-
-![](odbc.jpg)
+The information pulled out from the registration database through `get_data_from_db.R`. [^1]
 
 Data are then reshapped to prevent imbalances within each modalities of the selected variable. This is done in `feature.R`.
 
@@ -53,7 +51,9 @@ In case, `newpredictor` shape is a narrow one (meaning that `CaseNo`  is not uni
 
 > newpredictor.wide <- sqlQuery(dbhandleprogres, query5)
 
-> ## install.packages("reshape2")
+If reshape2 is not installed, you need to run
+> install.packages("reshape2")
+
 > library(reshape2)
 > newpredictor.wide <- dcast(newpredictor, CaseNo ~  yourvariable, value.var = "CaseNo" )
 
@@ -83,8 +83,8 @@ or incase, the frame was pivoted:
 >  cases$yourvariable[cases$yourvariable == "rare"] <- "frequent"
 
 The last step is to retain your engineered variable in cases2 by adding it in the list at the end of the script
+Subset data ready for analysis
 
-> ## Subset data ready for analysis
 > cases2 <- cases[ ,c ("CaseNo",
 >
 >                 )]
@@ -92,3 +92,9 @@ The last step is to retain your engineered variable in cases2 by adding it in th
 6. Rebuild the prediction model and check their respective accuracy `multi-classification-modeling.R` -- depending on your computer, be warned that this can take some time.... For this, you will need the file train.csv
 
 7. Adjust the prediction script `run-prioritisation.R` that feed the masterlist `progrescase-last.csv` generation together with the report `Prioritisation-report.Rmd`
+
+
+
+[^1]: Note an ODBC connection to the Microsoft SQL server where the data is stored shall first configured: this can be set-up through the dedicated windows utilitiy
+
+![](odbc.jpg)
