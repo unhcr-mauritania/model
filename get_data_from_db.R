@@ -1,3 +1,4 @@
+
 #install.packages("RODBC")
 library(RODBC)
 
@@ -37,6 +38,6 @@ AbsenteesGFD2 <- dcast(AbsenteesGFD, CaseNo ~  EventID, value.var = "CaseNo" )
 cases <- merge( x = cases, y = AbsenteesGFD2, by = "CaseNo", all.x = TRUE )
 
 ## clean folder 
-rm(dependency, capacity, specificneeds, specificneeds2,
+rm(dependency, capacity, specificneeds, specificneeds2, AbsenteesGFD2,
    passw, user, progres, dbhandleprogres,
    query1, query2, query3, query4)
