@@ -1,19 +1,470 @@
 ---
 title: "Prioritisation-report"
 author: "UNHCR"
-date: " `r format(Sys.Date(),  '%d %B %Y')`"
-output:
-  word_document:
-    fig_caption: yes
-    fig_height: 5
-    fig_width: 8
-    toc: yes
+date: "Last updated: `r format(Sys.Date(),  '%d %B %Y')`"
+output: 
+  html_document:
+    toc: true
     toc_depth: 2
-    reference_docx: style-unhcr-portrait.docx
+    toc_float: true
+    theme: cosmo
+    
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup , echo = FALSE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = ""}
+
+#devtools::install_github("cardiomoon/editData")
+#devtools::install_github("cardiomoon/ggplotAssist")
+#devtools::install_github("calligross/ggthemeassist")
+#devtools::install_github('bbc/bbplot')
+# install.packages("pacman")
+
+pacman::p_load('dplyr', 'tidyr', 'gapminder',
+               'ggplot2',  'ggalt',
+               'forcats', 'R.utils', 'png', 
+               'grid', 'ggpubr', 'scales',
+               'bbplot', 'knitr', 'pander', 'viridis',
+               'rgdal', 'cartography','SpatialPosition',
+               'OpenStreetMap', 'dummies')
+
+options(scipen = 999)
+
+
+theme_map <- function(...) {
+  theme_minimal() +
+    theme(
+      text = element_text(family = "Ubuntu Regular", color = "#22211d"),
+
+      #------------
+      ## Plot
+      # plot.background = element_rect(fill = "transparent",colour = NA),
+      # plot.background = element_rect(fill = "#f5f5f2", color = NA),
+      plot.title = element_text(face = "bold", size = 12, hjust = 0, color = "#4e4d47"),
+      plot.subtitle = element_text(size = 8, hjust = 0, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+      plot.margin = unit(c(.5,.5,.2,.5), "cm"),
+      plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184"),
+
+      #------------
+      ## Panel
+      panel.border = element_blank(),
+      # panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
+      panel.grid.major = element_line(color = "#ebebe5", size = 0.2),
+      panel.grid.minor = element_blank(),
+      # panel.background = element_rect(fill = "#f5f5f2", color = NA),
+      panel.spacing = unit(c(-.1,0.7,.2,1.7), "cm"),
+
+      #------------
+      ## legend
+      legend.title = element_text(size = 8),
+      legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"),
+      legend.position = "bottom",
+      legend.box = "horizontal",
+      # legend.position = c(0.8, 0.03),
+      legend.text.align = 0,
+      #legend.background = element_rect(fill = "transparent",colour = NA),
+      # legend.background = element_rect(fill = "#f5f5f2", color = NA),
+      legend.background = element_rect(fill = alpha('white', 0.0), color = NA),
+
+      #------------
+      ## Axis
+      axis.line = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks = element_blank(),
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      ...
+    )
+}
+
 ```
 
-## 
+##
+
+```{r pdataprep , echo = FALSE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = ""}
+
+mainDir <- getwd()
+data <- read.csv(paste0(mainDir,"/progrescase-last.csv"), encoding = "UTF-8", na.strings = "")
+
+## Predicted is factor - we check the level - then convert to character to add a factor for NA - and then revert to factor- adding order
+#levels(data$predicted.target)
+#prop.table(table(data$predicted.target, useNA = "ifany"))
+data$predicted.target <- factor(data$predicted.target, levels = c("full.allocation", "reduced.allocation", "no.allocation", "could.not.calculate" ))
+#data$predicted.target2 <- as.character(data$predicted.target)
+#str(data$predicted.target)
+data$predicted.target[is.na(data$predicted.target)] <- "could.not.calculate"
+
+#prop.table(table(data$predicted.target, useNA = "ifany"))
+
+#prop.table(table(data$predicted.target2, useNA = "ifany"))
+
+
+
+### Preparing aggaregation per district for mapping purpose
+
+##### Subsetting numeric variables
+selected.mappoly.numVars <- c( "Num_Inds" ,
+                     "Child_0_14",
+                     "Youth_15_17",
+                     "Work_15_64"  ,
+                     "Eldern_65",
+                     "Male" ,
+                     "Female")
+# Create subset of file with observation and selected variables & remove duplicated rows based on IDH
+datamappoly1.num <- data[ , c( "coal5id", selected.mappoly.numVars)]
+
+## Convert to numeric variable as they are categoric
+#datamappoly.num[,c(selected.mappoly.numVars)] <- lapply(datamappoly.num[,c(selected.mappoly.numVars)], numeric)
+
+## aggregate numeric value  based on mean
+datamappoly1.num2 <- datamappoly1.num %>%
+  group_by(coal5id) %>%
+  summarise_all(funs(mean(., na.rm = TRUE))) %>%
+  mutate_if(is.numeric, funs(round(., 2)))
+
+datamappoly1.num2 <- as.data.frame(datamappoly1.num2)
+
+
+## Getting a count
+datamappoly1.n <-  data[ ,c("coal5id", "Num_Inds")] %>% group_by(coal5id) %>% mutate(count = n())
+datamappoly1.n <- as.data.frame(unique(datamappoly1.n[ ,c('coal5id', 'count')]))
+
+
+##### Subsetting categoric variables
+selected.mappoly.catVars <- "predicted.target"
+# Create subset of file with observation and selected variables & remove duplicated rows based on IDH
+datamappoly1.cat <- data[ , c( 'coal5id', selected.mappoly.catVars)]
+
+## Convert to factor variable as they are categoric
+#datamappoly1.cat[,c(selected.mappoly.catVars)] <- lapply(datamappoly1.cat[,c(selected.mappoly.catVars)], factor)
+## Hot coding variable
+datamappoly1.cat <- dummy.data.frame(datamappoly1.cat, names = selected.mappoly.catVars, sep = ".")
+
+## aggregate numeric value  based on mean
+datamappoly1.cat2 <- datamappoly1.cat %>%
+  group_by(coal5id) %>%
+  summarise_all(funs(sum)) %>%
+  mutate_if(is.numeric, funs(round(., 2)))
+
+### Renaming select multiple variable
+#for (i in 1:ncol(datamappoly1.cat2)) {
+#  if (names(datamappoly1.cat2)[i] %in% as.character(selected.mappoly.cat.multi$fullname2)) {
+#    names(datamappoly1.cat2)[i] = as.character(selected.mappoly.cat.multi$fullname[match(names(datamappoly1.cat2)[i], selected.mappoly.cat.multi$fullname2)])
+#  }
+#}
+
+datamappoly1.cat2 <- as.data.frame(datamappoly1.cat2)
+
+## Bind everything
+datamappoly1 <- merge(x = datamappoly1.n, y = datamappoly1.cat2, by = "coal5id")
+for (i in 3:ncol(datamappoly1)) { datamappoly1[i] <- round(datamappoly1[i]/datamappoly1$count,2) }
+
+datamappoly1 <- merge(x = datamappoly1, y = datamappoly1.num2, by = "coal5id")
+
+
+## getting correct district and gov from coordinates
+campdistrict <- readOGR(paste0(mainDir,"/campdistrict.geojson"), verbose = FALSE)
+
+
+## Fortify
+campdistrict.fort <- fortify(campdistrict, region = "coal5id")
+datamappoly1 <- datamappoly1[!(is.na(datamappoly1$coal5id)), ]
+datamappoly1$id <- datamappoly1$coal5id
+campdistrict.map.fort <- merge( x = campdistrict.fort, y = datamappoly1, by = "id")
+
+
+idList <- unique(campdistrict.map.fort$id)
+centroids.df <- as.data.frame(coordinates(campdistrict))
+names(centroids.df) <- c("Longitude", "Latitude")
+
+centroids.df <- data.frame(id = idList, centroids.df)
+centroids.df <- merge( x = centroids.df, y = datamappoly1, by = "id")
+
+
+## get extend
+xmin <- as.data.frame(campdistrict@bbox)[1,1]
+xmax <- as.data.frame(campdistrict@bbox)[1,2]
+ymin <- as.data.frame(campdistrict@bbox)[2,1]
+ymax <- as.data.frame(campdistrict@bbox)[2,2]
+
+
+## Extend the extend
+xmin <- xmin - ((xmax - xmin)/10)
+xmax <- xmax + ((xmax - xmin)/10)
+ymin <- ymin - ((ymax - ymin)/10)
+ymax <- ymax + ((ymax - ymin)/10)
+
+
+## Map background
+map <- openmap(c(lat = ymax, lon = xmin ), c(lat = ymin, lon = xmax), type = "osm")
+mapLatLon <- openproj(map)
+
+#names(campdistrict.map.fort)
+
+
+
+```
+
+## Results of predictive model
+
+```{r plot1, echo = FALSE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = ""}
+
+plot1 <- ggplot(data, aes(x = predicted.target)) +
+  geom_bar( stat = "count",  
+           fill = "#1380A1") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  geom_label(aes(label = ..count.., y = ..count..), stat = "count",
+             hjust = 1, 
+             vjust = 0.5, 
+             colour = "white", 
+             fill = NA, 
+             label.size = NA, 
+             family = "Helvetica", 
+             size = 6) +
+  coord_flip() +
+  bbc_style() +
+  labs(title = "How many per category?",
+       subtitle = "Predicted category by cases #")
+
+#plot1
+
+finalise_plot(plot_name = plot1,
+              source = "Source: UNHCR Registration, 2019",
+              save_filepath = "plot1.png",
+              width_pixels = 640,
+              height_pixels = 450,
+              logo_image_path = "logo.png")
+
+```
+
+
+
+# Mapping results
+
+```{r count, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat,  group = group),
+               colour = "white", alpha = 0.5 ) +
+  geom_point(data = centroids.df,
+               aes(x = Longitude, y = Latitude, 
+                   size = count )) +
+  coord_equal() +
+  theme_map() +
+
+    scale_size_area(
+                      name = "Number of cases for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, 
+                                            nrow = 1, byrow = T, reverse = T )  ) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs( title = "Number of case per blocks" , subtitle = "", caption = "UNHCR Mauritania", x = NULL, y = NULL)
+
+
+```
+
+
+## By Predicted group
+
+```{r no.allocation, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat, fill = predicted.target.no.allocation * 100, group = group),
+               colour = "white", alpha = 0.7 ) +
+  coord_equal() +
+  theme_map() +
+  scale_fill_viridis(
+                      name = "Percentage for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            keyheight = unit(2, units = "mm"),  keywidth = unit(length(labels)*10, units = "mm"),
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, nrow = 1, byrow = T, reverse = T )) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs( title = "Predicted Prioritisation: No allocation" , subtitle = "", caption = "UNHCR Mauritania", x = NULL, y = NULL)
+
+
+```
+
+
+
+```{r reduced.allocation, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat,  group = group),
+               colour = "white", alpha = 0.5 ) +
+  geom_point(data = centroids.df,
+               aes(x = Longitude, y = Latitude, 
+                   colour = predicted.target.reduced.allocation * 100,
+                   size = predicted.target.reduced.allocation * count )) +
+  coord_equal() +
+  theme_map() +
+  scale_colour_viridis(
+                      name = "Percentage for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            keyheight = unit(2, units = "mm"),  keywidth = unit(length(labels)*10, units = "mm"),
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, 
+                                            nrow = 1, byrow = T, reverse = T )) +
+
+    scale_size_area(
+                      name = "Number of cases for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, 
+                                            nrow = 1, byrow = T, reverse = T )  ) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs( title = "Predicted Prioritisation: Reduced allocation" , subtitle = "", caption = "UNHCR Mauritania", x = NULL, y = NULL)
+
+
+```
+
+
+```{r reduced.allocation, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat, fill = predicted.target.could.reduced.allocation * 100, group = group),
+               colour = "white", alpha = 0.7 ) +
+  coord_equal() +
+  theme_map() +
+  scale_fill_viridis(
+                      name = "Percentage for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            keyheight = unit(2, units = "mm"),  keywidth = unit(length(labels)*10, units = "mm"),
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, nrow = 1, byrow = T, reverse = T )) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs( title = "Predicted Prioritisation: Reduced allocation" , subtitle = "", caption = "UNHCR Mauritania", x = NULL, y = NULL)
+
+
+```
+
+```{r full.allocation, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat, fill = predicted.target.full.allocation * 100, group = group),
+               colour = "white", alpha = 0.7 ) +
+  coord_equal() +
+  theme_map() +
+  scale_fill_viridis(
+                      name = "Percentage for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            keyheight = unit(2, units = "mm"),  keywidth = unit(length(labels)*10, units = "mm"),
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, nrow = 1, byrow = T, reverse = T )) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs( title = "Predicted Prioritisation: Full allocation" , subtitle = "", caption = "UNHCR Mauritania", x = NULL, y = NULL)
+
+
+```
+
+```{r could.not.calculate, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat, fill = predicted.target.could.not.calculate * 100, group = group),
+               colour = "white", alpha = 0.7 ) +
+  coord_equal() +
+  theme_map() +
+  scale_fill_viridis(
+                      name = "Percentage for that modality",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            keyheight = unit(2, units = "mm"),  keywidth = unit(length(labels)*10, units = "mm"),
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, nrow = 1, byrow = T, reverse = T )) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs( title = "Predicted Prioritisation: could not calculate" , subtitle = "", caption = "UNHCR Mauritania", x = NULL, y = NULL)
+
+
+```
+
+
+# 
+
+
+
+## By Demographics
+
+```{r agechef.tab, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height=4, size="small"}
+
+#"Num_Inds", "Child_0_14", "Youth_15_17", "Work_15_64", "Eldern_65", "Male" ,   "Female"  
+
+autoplot(mapLatLon) +
+  geom_polygon(data = campdistrict.map.fort,
+               aes(x = long, y = lat, fill = Num_Inds, group = group),
+               colour = "white", alpha = 0.7 ) +
+  coord_equal() +
+  theme_map() +
+  scale_fill_viridis(
+                      name = "Average value",
+                      guide = guide_legend( direction = "horizontal", label.position = "bottom",
+                                            keyheight = unit(2, units = "mm"),  keywidth = unit(length(labels)*10, units = "mm"),
+                                            title.position = 'top',  title.hjust = 0.5, label.hjust = 1, nrow = 1, byrow = T, reverse = T )) +
+  theme( legend.position = c(0.5, 0.03), legend.text.align = 0, legend.background = element_rect(fill = alpha('white', 0.0)),
+         legend.text = element_text(size = 7, hjust = 0, color = "#4e4d47"), plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
+         plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47", margin = margin(b = -0.1, t = -0.1, l = 2, unit = "cm"), debug = F),
+         legend.title = element_text(size = 8), plot.margin = unit(c(.5,.5,.2,.5), "cm"), panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
+         panel.border = element_blank(), plot.caption = element_text(size = 6, hjust = 0.92, margin = margin(t = 0.2, b = 0, unit = "cm"), color = "#939184")) +
+  labs(title = "Average Numbers of individuals" , subtitle = "", caption = "UNHCR Mauritania /ACF", x = NULL, y = NULL)
+
+
+
+```
+
+
+
+```{r plot2, echo = FALSE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = ""}
+
+plot2 <- ggplot(data, aes(x = Case.size)) +
+  geom_bar( stat = "count",  
+           fill = "#1380A1") +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  
+  facet_wrap(~  predicted.target, ncol = 2) +
+  geom_label(aes(label = ..count.., y = ..count..), stat = "count",
+             hjust = 1, 
+             vjust = 0.5, 
+             colour = "white", 
+             fill = NA, 
+             label.size = NA, 
+             family = "Helvetica", 
+             size = 6) +
+  coord_flip() +
+  bbc_style() +
+  labs(title = "According to Case size?",
+       subtitle = "Predicted category by cases #")
+
+#plot1
+
+finalise_plot(plot_name = plot2,
+              source = "Source: UNHCR Registration, 2019",
+              save_filepath = "plot2.png",
+              width_pixels = 1540,
+              height_pixels = 750,
+              logo_image_path = "logo.png")
+
+```
+
+

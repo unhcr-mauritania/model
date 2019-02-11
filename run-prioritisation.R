@@ -41,8 +41,11 @@ cases2target <- cbind(cases2,forest_prediction )
 prop.table(table(forest_prediction$predicted.target, useNA = "ifany"))
 table(forest_prediction$predicted.target, useNA = "ifany")
 
-cat("Saving Results. \n")
+cat("Saving Results for records. \n")
 main <- getwd()
 write.csv(cases2target , paste0(main, "/progrescase-target", format(Sys.time(), "%m-%d-%Y"),".csv"), row.names = FALSE)
-write.csv(cases2target , paste0(main, "/progrescase-last.csv"), row.names = FALSE)
+
+
+cat("Saving Results for report. \n")
+write.csv(cbind(cases, cases2target) , paste0(main, "/progrescase-last.csv"), row.names = FALSE)
 
