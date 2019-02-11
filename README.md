@@ -21,10 +21,10 @@ The result of a vulnerability survey using measurement of food security is then 
 
 The following algorithms are used and compared to generate prediction: 
 
- * Multinomial logistic regression 
- * Neural Network regression 
- * Gradient Boosted Decision Trees
- * Random Decision Forest
+ * [Multinomial Logistic Regression](https://en.wikipedia.org/wiki/Multinomial_logistic_regression) 
+ * [Neural Network Regression](https://en.wikipedia.org/wiki/General_regression_neural_network) 
+ * [Gradient Boosted Decision Trees](https://en.wikipedia.org/wiki/Gradient_boosting)
+ * [Random Decision Forest](https://en.wikipedia.org/wiki/Random_forest)
  
 The resulting models can be eventually re-trained based on potential categories revision for cases where the targeting committe  would redress cases categorisation.
 
