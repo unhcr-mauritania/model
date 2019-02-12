@@ -87,9 +87,7 @@ or incase, the frame was pivoted:
 The last step is to retain your engineered variable in cases2 by adding it in the list at the end of the script
 Subset data ready for analysis
 
-> cases2 <- cases[ ,c ("CaseNo",
->
->                 )]
+> cases2 <- cases[ ,c ("CaseNo", ...   )]
 
 6. Rebuild the prediction model and check their respective accuracy `multi-classification-modeling.R` -- depending on your computer, be warned that this can take some time.... For this, you will need the file `train.csv` where you should have a variable `CaseNo` in order to do the join.
 
