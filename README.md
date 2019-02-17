@@ -1,6 +1,6 @@
 # Modeling Assistance Prioritisation
 
-This project allows to run an assistance targeting categorisation.
+This project allows to run an assistance targeting categorisation. Elements from this script were insipired by a [Microsoft tutorial](https://github.com/Microsoft/SQL-Server-R-Services-Samples/blob/master/PredictiveMaintenance/R/02c-multi-classification-modeling.R)
 
 The different categories were defined based on the profiling study (**Who?**) and the result of the strategic discussion on targeting (**What?**) and allow to address the question on **How** assistance will be delivered.
 
@@ -17,9 +17,11 @@ The information pulled out from the registration database through `get_data_from
 
 Data are then reshapped to prevent imbalances within each modalities of the selected variable. This is done in `feature.R`.
 
-The result of a vulnerability survey using measurement of food security is then merged with registration information. In the next step, different models are trained through  `multi-classification-modeling.R`.
+The result of a vulnerability survey using measurement of food security is then merged with registration information. The dataset is separated in two parts one for training the model and the second to check its accuraracy, the dataset split allow to minimise the risk of model overfitting
 
-The following algorithms are used and compared to generate prediction: 
+In the next step, different models are trained through  `multi-classification-modeling.R`.
+
+The following algorithms are compiled and compared to generate prediction: 
 
  * [Multinomial Logistic Regression](https://en.wikipedia.org/wiki/Multinomial_logistic_regression) 
  * [Neural Network Regression](https://en.wikipedia.org/wiki/General_regression_neural_network) 

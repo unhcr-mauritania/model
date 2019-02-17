@@ -21,7 +21,7 @@ output:
 #devtools::install_github('bbc/bbplot')
 # install.packages("pacman")
 
-pacman::p_load('dplyr', 'tidyr', 'gapminder',
+pacman::p_load('dplyr', 'tidyr', 
                'ggplot2',  'ggalt',
                'forcats', 'R.utils', 'png', 
                'grid', 'ggpubr', 'scales',

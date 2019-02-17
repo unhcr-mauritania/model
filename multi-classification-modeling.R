@@ -15,6 +15,13 @@
 ## "no.allocation",
 ## "reduced.allocation"
 
+## Install pacman to manage package installation
+# install.packages("pacman")
+
+pacman::p_load('caret', 'RODBC',
+               'reshape2',  'randomForest',
+               'gbm', 'nnet')
+
 
 ####################################################################################################
 ####################################################################################################
@@ -49,10 +56,31 @@ train_table <- train_table %>% mutate_if(is.character, as.factor)
 train_table <- train_table %>% mutate_if(is.integer, as.factor)
 #str(train_table)
 
-train_table_na <- train_table[, colSums(is.na(train_table)) == 0]
+train_table <- train_table[, colSums(is.na(train_table)) == 0]
 #str(train_table_na)
 
-prediction_df <- train_table_na
+
+####################################################################################################
+## Partitionning dataset for train & test
+####################################################################################################
+
+# The function createDataPartition can be used to create balanced splits of the data.
+# If the y argument to this function is a factor, the random sampling occurs within each class
+# and should preserve the overall class distribution of the data.
+# Here we create a single 60/40% split of the  data:
+
+### see documentation here: http://topepo.github.io/caret/data-splitting.html
+
+#install caret package
+#install.packages('caret')
+#load package
+#library(caret)
+trainIndex = createDataPartition(train_table_na$unconditionnal2,
+                                 p = 0.6, list = FALSE,times = 1)
+
+train_table_na = train_table[trainIndex,]
+prediction_df = train_table[-trainIndex,]
+
 
 ####################################################################################################
 ## Mulit-classification model evaluation metrics
@@ -98,7 +126,7 @@ evaluate_model <- function(observed, predicted) {
 # install.packages("randomForest")
 cat("Joining on table from survey with observed vulnerability category. \n")
 
-library(randomForest)
+#library(randomForest)
 forest_model <- randomForest(unconditionnal2 ~ ., data = train_table_na,
                              nTree = 8,
                              maxDepth = 32,
@@ -126,19 +154,19 @@ forest_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 # install.packages("gbm")
 cat("Joining on table from survey with observed vulnerability category. \n")
 
-library(gbm)
+#library(gbm)
 boosted_model <- gbm(unconditionnal2 ~ ., data = train_table_na,
-                     distribution='multinomial',
-                     n.trees=200,
-                     interaction.depth=4,
-                     shrinkage=0.005)
+                     distribution = 'multinomial',
+                     n.trees = 200,
+                     interaction.depth = 4,
+                     shrinkage = 0.005)
 ## save this model
 save(boosted_model, file = "boosted_model.rda")
 
 # load("boosted_model.rda")
 
 boosted_prediction <- predict(boosted_model, newdata = prediction_df,
-                              n.trees = 200,type='response')
+                              n.trees = 200,type = 'response')
 boosted_prediction <- as.data.frame(boosted_prediction)
 #levels(train_table_na$unconditionnal2)
 names(boosted_prediction) <- c("full.allocation",
@@ -157,7 +185,7 @@ boosted_metrics <- evaluate_model(observed = prediction_df$unconditionnal2,
 ####################################################################################################
 # install.packages("nnet")
 cat("Multinomial modeling. \n")
-library(nnet)
+#library(nnet)
 
 multinomial_model <- multinom(unconditionnal2 ~ ., data = train_table_na)
 
@@ -205,7 +233,7 @@ multinomialstep_metrics <- evaluate_model(observed = prediction_df$unconditionna
 ####################################################################################################
 # install.packages("nnet")
 cat("Neural network regression modeling. \n")
-library(nnet)
+#library(nnet)
 
 #nodes <- 10
 #weights <- nodes * (35 + 3) + nodes + 3
@@ -264,14 +292,18 @@ metrics_df <- rbind(forest_metrics,
                     multinomialstep_metrics,
                     nnet_metrics)
 metrics_df <- as.data.frame(metrics_df)
+
 rownames(metrics_df) <- NULL
 Algorithms <- c("Random Decision Forest",
                 "Boosted Decision Tree",
                 "Multinomial Regression",
                 "Multinomial Step Regression",
                 "Neural Network")
+
 metrics_df <- cbind(Algorithms, metrics_df)
+
 metrics_df
+
 write.csv(metrics_df , paste0(main, "/metrics_df", format(Sys.time(), "%m-%d-%Y"),".csv"))
 
 #rm(list = ls())
