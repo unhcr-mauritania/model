@@ -105,41 +105,7 @@ cases$educat[cases$educat == "PG"] <- "Higher Education" # "Post university leve
 cases$educat <- as.factor(cases$educat)
 prop.table(table(cases$educat, useNA = "ifany"))
 
-####################################################################################################
-## Extracting main ocupation category from occupation code
 
-cases$occupationcat <- "Student.or.NoOccup.or.Unknownp"
-#cases$occupationcat[cases$occupationcode ==  "0001"] <- "Military"
-#cases$occupationcat[cases$occupationcode ==  "None"] <- "Student.or.NoOccup"
-#cases$occupationcat[cases$occupationcode ==  "0110"] <- "Student.or.NoOccup"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "1"] <- "Manager"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "1"] <- "Qualified"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "2"] <- "Professional"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "2"] <- "Qualified"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "3"] <- "Technician"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "3"] <- "Qualified"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "4"] <- "Clerk"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "4"] <- "Qualified"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "5"] <- "ServiceMarket"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "6"] <- "Agricultural.Craft.Machine"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "7"] <- "Agricultural.Craft.Machine"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "8"] <- "Agricultural.Craft.Machine"
-cases$occupationcat[substr(cases$occupationcode, 1,1 )== "9"] <- "Agricultural.Craft.Machine"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "6"] <- "Agricultural"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "7"] <- "Craft"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "8"] <- "Machine"
-#cases$occupationcat[substr(cases$occupationcode, 1,1 )== "9"] <- "Elementary"
-
-#cases$occupationcat[is.na(cases$occupationcat)]<- "UnknownOccup"
-
-
-#occupationcat <- as.data.frame(table(cases$occupationcat, useNA = "ifany"))
-
-
-cases$occupationcat <- factor(cases$occupationcat, levels = c("Qualified", "ServiceMarket",
-                                                              "Agricultural.Craft.Machine",
-                                                              "Student.or.NoOccup.or.Unknownp"))
-prop.table(table(cases$occupationcat, useNA = "ifany"))
 
 
 ####################################################################################################
@@ -233,38 +199,37 @@ prop.table(table(cases$AbsenteesGFD2.discrete, useNA = "ifany"))
 
 ####################################################################################################
 ## Subset data ready for analysis
-cases2 <- cases[ ,c ("CaseNo",
 
-                     ## Featured characteristics
-                     "familyprofile",
-                     "Case.size",
-                     "dependency" ,
-                     "female.ratio",
-                     "dem_marriagecat" ,
-                     "agecohort",
-                     "YearArrivalCat" ,
-                     "educat"  ,
-                     "occupationcat" ,
-                     "Child.at.risk",
-                     "Disabled",
-                     "Elder",
-                     "Single.Child" ,
-                     "Serious.medical.needs",
-                     "single.parent" ,
-
-                     #"coal5id",
+colNames <- colnames(cases)
+propertyCols <- colNames[grep(pattern = "possede_" , colNames)]
+revenueCol_1 <- colNames[grep(pattern = "Revenue1_" , colNames)]
+revenueCol_2 <- colNames[grep(pattern = "Revenue2_" , colNames)]
 
 
-                     ## Socio-Eco - Data
-                     "ProcessingGroupNumberSoftfield1", "ProcessingGroupNumberSoftfield2",
-                     "ProcessingGroupNumberSoftfield3", "ProcessingGroupNumberSoftfield4",
+cases2 <- cases [ , c (c ("CaseNo",
+                          ## Featured characteristics
+                          "familyprofile",
+                          "Case.size",
+                          "dependency" ,
+                          "female.ratio",
+                          "dem_marriagecat" ,
+                          "agecohort",
+                          "YearArrivalCat" ,
+                          "educat" ,
+                          "Child.at.risk",
+                          "Disabled",
+                          "Elder",
+                          "Single.Child" ,
+                          "Serious.medical.needs",
+                          "single.parent" ,
+                          #"coal5id",
+                          ## Socio-Eco - Data
+                          ## Occupation
+                          "Manager" , "Professional" , "Technician" , "Clerk" , "ServiceMarket" , "Agricultural"
+                          , "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown", 
+                          "AbsenteesGFD2.discrete") , propertyCols , revenueCol_1 , revenueCol_2) ]
 
-                     "ProcessingGroupFlagSoftfield1" ,   "ProcessingGroupFlagSoftfield2",
-                     "ProcessingGroupFlagSoftfield3" ,  "ProcessingGroupFlagSoftfield4",
-                     "ProcessingGroupFlagSoftfield5",   "ProcessingGroupFlagSoftfield6",
 
-                     "ProcessingGroupCodeSoftfield1"  ,  "ProcessingGroupCodeSoftfield2",
-                     "ProcessingGroupCodeSoftfield3" ,  "ProcessingGroupCodeSoftfield4",
-                     "ProcessingGroupCodeSoftfield5",
-                     "AbsenteesGFD2.discrete"
-)]
+
+
+
