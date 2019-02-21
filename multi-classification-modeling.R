@@ -45,6 +45,11 @@ cat("Joining on table from survey with observed vulnerability category. \n")
 train <- read.csv("train.csv")
 
 ## Targeting on phase2
+prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
+cases2[ , prostitutionCols] <- list(NULL)
+str(cases2)
+
+
 train_table <-  merge(x = cases2, y = train[ , c("CaseNo", "unconditionnal2")] , by = "CaseNo", all.y = TRUE)
 
 row.names(train_table) <- train_table$CaseNo
