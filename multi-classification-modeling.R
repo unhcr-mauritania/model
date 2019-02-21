@@ -75,7 +75,7 @@ train_table <- train_table[, colSums(is.na(train_table)) == 0]
 #install.packages('caret')
 #load package
 #library(caret)
-trainIndex = createDataPartition(train_table_na$unconditionnal2,
+trainIndex = createDataPartition(train_table$unconditionnal2,
                                  p = 0.6, list = FALSE,times = 1)
 
 train_table_na = train_table[trainIndex,]
