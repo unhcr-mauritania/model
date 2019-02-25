@@ -13,7 +13,7 @@
 source("pass.R")
 
 cat("Connecting to the server \n")
-dbhandleprogres <- odbcConnect(progres, uid=user, pwd=passw)
+dbhandleprogres <- odbcConnect(progres, uid = user, pwd = passw)
 source("extract-query.R")
 
 ## fetching the view containing information aggregated at the case level and the event
@@ -23,7 +23,7 @@ capacity <- sqlQuery(dbhandleprogres, query2)
 specificneeds <- sqlQuery(dbhandleprogres, query3)
 AbsenteesGFD <- sqlQuery(dbhandleprogres, query4)
 
-names (AbsenteesGFD)
+names(AbsenteesGFD)
 cases <- merge( x = dependency, y = capacity, by = "CaseNo" )
 
 ## install.packages("reshape2")
