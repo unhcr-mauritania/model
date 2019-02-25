@@ -226,10 +226,15 @@ cases2 <- cases [ , c (c ("CaseNo",
                           ## Socio-Eco - Data
                           ## Occupation
                           "Manager" , "Professional" , "Technician" , "Clerk" , "ServiceMarket" , "Agricultural"
-                          , "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown", 
+                          , "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown",
                           "AbsenteesGFD2.discrete") , propertyCols , revenueCol_1 , revenueCol_2) ]
 
+## Remove variable with too little info
+prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
 
+cases2[ , prostitutionCols] <- list(NULL)
 
+#str(cases2)
+rm(prostitutionCols, propertyCols,revenueCol_1, revenueCol_2,colNames  )
 
 
