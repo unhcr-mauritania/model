@@ -45,6 +45,11 @@ cat("Joining on table from survey with observed vulnerability category. \n")
 train <- read.csv("train.csv")
 
 ## Targeting on phase2
+prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
+cases2[ , prostitutionCols] <- list(NULL)
+str(cases2)
+
+
 train_table <-  merge(x = cases2, y = train[ , c("CaseNo", "unconditionnal2")] , by = "CaseNo", all.y = TRUE)
 
 row.names(train_table) <- train_table$CaseNo
@@ -75,7 +80,7 @@ train_table <- train_table[, colSums(is.na(train_table)) == 0]
 #install.packages('caret')
 #load package
 #library(caret)
-trainIndex = createDataPartition(train_table_na$unconditionnal2,
+trainIndex = createDataPartition(train_table$unconditionnal2,
                                  p = 0.6, list = FALSE,times = 1)
 
 train_table_na = train_table[trainIndex,]
