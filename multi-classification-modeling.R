@@ -136,6 +136,7 @@ forest_model <- randomForest(unconditionnal2 ~ ., data = train_table_na,
                              nTree = 8,
                              maxDepth = 32,
                              mTry = 35,
+                             na.action = na.omit,
                              seed = 5)
 ## save this model
 save(forest_model, file = "forest_model.rda")
