@@ -44,14 +44,11 @@ cat("Joining on table from survey with observed vulnerability category. \n")
 
 train <- read.csv("train.csv")
 
-## Targeting on phase2
-prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
-cases2[ , prostitutionCols] <- list(NULL)
-str(cases2)
 
-
+## Merging Registry & survey data
 train_table <-  merge(x = cases2, y = train[ , c("CaseNo", "unconditionnal2")] , by = "CaseNo", all.y = TRUE)
 
+## Keeping case id as row names only
 row.names(train_table) <- train_table$CaseNo
 train_table$CaseNo <- NULL
 
@@ -61,8 +58,9 @@ train_table <- train_table %>% mutate_if(is.character, as.factor)
 train_table <- train_table %>% mutate_if(is.integer, as.factor)
 #str(train_table)
 
-train_table <- train_table[, colSums(is.na(train_table)) == 0]
-#str(train_table_na)
+## Remove variables with NA
+train_table <- train_table[, colSums(!is.na(train_table)) > 0]
+#str(train_table)
 
 
 ####################################################################################################

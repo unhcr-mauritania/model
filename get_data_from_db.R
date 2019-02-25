@@ -13,7 +13,7 @@ library(RODBC)
 source("pass.R")
 
 cat("Connecting to the server \n")
-dbhandleprogres <- odbcConnect(progres, uid=user, pwd=passw)
+dbhandleprogres <- odbcConnect(progres, uid = user, pwd = passw)
 source("extract-query.R")
 
 ## fetching the view containing information aggregated at the case level and the event
@@ -26,13 +26,12 @@ capacity3 <- sqlQuery(dbhandleprogres, query5)
 specificneeds <- sqlQuery(dbhandleprogres, query6)
 AbsenteesGFD <- sqlQuery(dbhandleprogres, query7)
 
-names (AbsenteesGFD)
+
+names(AbsenteesGFD)
 cases <- merge( x = dependency, y = Property, by = "CaseNo" )
 cases <- merge( x = cases, y = capacity1, by = "CaseNo" )
 cases <- merge( x = cases, y = capacity2, by = "CaseNo" )
 cases <- merge( x = cases, y = capacity3, by = "CaseNo" )
-
-
 
 
 ## install.packages("reshape2")
