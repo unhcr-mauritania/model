@@ -243,7 +243,7 @@ revenueCol_1 <- colNames[grep(pattern = "Revenue1_" , colNames)]
 revenueCol_2 <- colNames[grep(pattern = "Revenue2_" , colNames)]
 
 
-cases2 <- cases [ , c    ("CaseNo",
+cases2 <- cases [ , c(   c("CaseNo",
                           ## Featured characteristics
                           "familyprofile",
                           "Case.size",
@@ -262,9 +262,17 @@ cases2 <- cases [ , c    ("CaseNo",
                           #"coal5id",
                           ## Socio-Eco - Data
                           ## Occupation
-                          "Manager" , "Professional" , "Technician" , "Clerk" , "ServiceMarket" , "Agricultural"
-                          , "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown",
-                          "AbsenteesGFD2.discrete") , propertyCols , revenueCol_1 , revenueCol_2) ]
+                          "Manager" , "Professional" , "Technician" , "Clerk" , "ServiceMarket" ,
+                          "Agricultural", "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown",
+
+                          "AbsenteesGFD2.discrete",
+
+                          # Property
+                          "possede_voiture1", "possede_moto1", "possede_Charrette1", "possede_panneaux1", "possede_Bijoux1",
+                          "possede_Radio1", "possede_Ordinateur1", "possede_Meuble1",
+                          "possede_asins1", "possede_ovincaprin1", "possede_caprin1", "possede_bovincamelin1",
+                          "possede_camelin1", "possede_camelin21") ,
+                         revenueCol_1 , revenueCol_2) ]
 
 ## Remove variable with too little info
 prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
