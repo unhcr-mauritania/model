@@ -60,6 +60,11 @@ train_table <- train_table %>% mutate_if(is.integer, as.factor)
 
 ## Remove variables with NA
 train_table <- train_table[, colSums(!is.na(train_table)) > 0]
+
+##remove rows which have empty values:
+row.has.na  <- apply(train_table, 1, function(x){any(is.na(x))})
+train_table <- train_table[!row.has.na, ]
+
 #str(train_table)
 
 

@@ -20,6 +20,10 @@ cases2 <- cases2 %>% mutate_if(is.integer, as.factor)
 ## Remove variables with NA
 cases2 <- cases2[, colSums(!is.na(cases2)) > 0]
 
+##remove rows which have empty values:
+row.has.na  <- apply(cases2, 1, function(x){any(is.na(x))})
+cases2 <- cases2[!row.has.na, ]
+
 ####################################################################################################
 ## Decision forest modeling
 ####################################################################################################

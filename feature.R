@@ -271,7 +271,7 @@ cases2 <- cases [ , c(   c("CaseNo",
                           "possede_voiture1", "possede_moto1", "possede_Charrette1", "possede_panneaux1", "possede_Bijoux1",
                           "possede_Radio1", "possede_Ordinateur1", "possede_Meuble1",
                           "possede_asins1", "possede_ovincaprin1", "possede_caprin1", "possede_bovincamelin1",
-                          "possede_camelin1", "possede_camelin21") ,
+                          "possede_camelin1", "possede_camelin2") ,
                          revenueCol_1 , revenueCol_2) ]
 
 ## Remove variable with too little info
@@ -279,7 +279,14 @@ prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
 
 cases2[ , prostitutionCols] <- list(NULL)
 
+
+### Quick overview of tabulation
+for (i in 1:ncol(cases2)) {
+  table(cases[ ,1], useNA = "always")
+}
+
+
 #str(cases2)
-rm(prostitutionCols, propertyCols,revenueCol_1, revenueCol_2,colNames  )
+rm(prostitutionCols, revenueCol_1, revenueCol_2,colNames  )
 
 
