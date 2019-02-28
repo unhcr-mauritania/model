@@ -15,11 +15,7 @@ output:
 
 ```{r setup , echo = FALSE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = ""}
 
-#devtools::install_github("cardiomoon/editData")
-#devtools::install_github("cardiomoon/ggplotAssist")
-#devtools::install_github("calligross/ggthemeassist")
-#devtools::install_github('bbc/bbplot')
-# install.packages("pacman")
+
 
 library('dplyr')
 library('tidyr')
