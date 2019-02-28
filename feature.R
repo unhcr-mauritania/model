@@ -210,7 +210,7 @@ cases$possede_Ordinateur1  <- ifelse(cases$possede_Ordinateur > 0, "yes", "no")
 cases$possede_Meuble1  <- ifelse(cases$possede_Meuble > 0, "yes", "no")
 
 
-cases$possede_asins1 <- ifelse(household$possede_camelin >= 1,     "yes",  "no" )
+cases$possede_asins1 <- ifelse(cases$possede_camelin >= 1,     "yes",  "no" )
 
 psum <- function(..., na.rm=FALSE) {
           x <- list(...)
