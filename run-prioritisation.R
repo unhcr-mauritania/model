@@ -16,6 +16,10 @@ library(dplyr)
 cases2 <- cases2 %>% mutate_if(is.character, as.factor)
 cases2 <- cases2 %>% mutate_if(is.integer, as.factor)
 
+
+## Remove variables with NA
+cases2 <- cases2[, colSums(!is.na(cases2)) > 0]
+
 ####################################################################################################
 ## Decision forest modeling
 ####################################################################################################
