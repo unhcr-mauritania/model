@@ -33,7 +33,7 @@ library('viridis')
 library('rgdal')
 library( 'cartography')
 library('SpatialPosition')
-library('OpenStreetMap')
+#library('OpenStreetMap')
 library('dummies')
 
 options(scipen = 999)
@@ -45,14 +45,14 @@ bbc_style <- function() {
 
   #Text format:
   #This sets the font, size, type and colour of text for the chart's title
-  plot.title = ggplot2::element_text(family=font,
-                            size=28,
-                            face="bold",
-                            color="#222222"),
+  plot.title = ggplot2::element_text(family = font,
+                            size = 28,
+                            face = "bold",
+                            color = "#222222"),
   #This sets the font, size, type and colour of text for the chart's subtitle, as well as setting a margin between the title and the subtitle
-  plot.subtitle = ggplot2::element_text(family=font,
-                               size=22,
-                               margin=ggplot2::margin(9,0,9,0)),
+  plot.subtitle = ggplot2::element_text(family = font,
+                               size = 22,
+                               margin = ggplot2::margin(9,0,9,0)),
   plot.caption = ggplot2::element_blank(),
   #This leaves the caption text element empty, because it is set elsewhere in the finalise plot function
 
@@ -63,24 +63,24 @@ bbc_style <- function() {
   legend.background = ggplot2::element_blank(),
   legend.title = ggplot2::element_blank(),
   legend.key = ggplot2::element_blank(),
-  legend.text = ggplot2::element_text(family=font,
-                             size=18,
-                             color="#222222"),
+  legend.text = ggplot2::element_text(family = font,
+                             size = 18,
+                             color = "#222222"),
 
   #Axis format
   #This sets the text font, size and colour for the axis test, as well as setting the margins and removes lines and ticks. In some cases, axis lines and axis ticks are things we would want to have in the chart - the cookbook shows examples of how to do so.
   axis.title = ggplot2::element_blank(),
-  axis.text = ggplot2::element_text(family=font,
-                           size=18,
-                           color="#222222"),
-  axis.text.x = ggplot2::element_text(margin=ggplot2::margin(5, b = 10)),
+  axis.text = ggplot2::element_text(family = font,
+                           size = 18,
+                           color = "#222222"),
+  axis.text.x = ggplot2::element_text(margin = ggplot2::margin(5, b = 10)),
   axis.ticks = ggplot2::element_blank(),
   axis.line = ggplot2::element_blank(),
 
   #Grid lines
   #This removes all minor gridlines and adds major y gridlines. In many cases you will want to change this to remove y gridlines and add x gridlines. The cookbook shows you examples for doing so
   panel.grid.minor = ggplot2::element_blank(),
-  panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"),
+  panel.grid.major.y = ggplot2::element_line(color = "#cbcbcb"),
   panel.grid.major.x = ggplot2::element_blank(),
 
   #Blank background
@@ -241,8 +241,8 @@ ymax <- ymax + ((ymax - ymin)/10)
 
 
 ## Map background
-map <- openmap(c(lat = ymax, lon = xmin ), c(lat = ymin, lon = xmax), type = "osm")
-mapLatLon <- openproj(map)
+#map <- openmap(c(lat = ymax, lon = xmin ), c(lat = ymin, lon = xmax), type = "osm")
+#mapLatLon <- openproj(map)
 
 #names(campdistrict.map.fort)
 
@@ -363,10 +363,9 @@ ggpubr::ggarrange(left_align(plot3, c("subtitle", "title")), ncol = 1, nrow = 1)
 
 ```{r count, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height= 4,size="small"}
 
-autoplot(mapLatLon) +
-  geom_polygon(data = campdistrict.map.fort,
-               aes(x = long, y = lat,  group = group),
-               colour = "white", alpha = 0.6 ) +
+#autoplot(mapLatLon) +
+ggplot() + 
+  geom_polygon( data = campdistrict.map.fort, aes(x = long, y = lat, group = group), colour = "white", alpha = 0.6 ) +
   geom_point(data = centroids.df,
                aes(x = Longitude, y = Latitude, 
                    size = count )) +
@@ -404,7 +403,8 @@ autoplot(mapLatLon) +
          legend.title = element_text(size = 6), 
          plot.title = element_text(size = 13),
          plot.subtitle = element_text(size = 11),
-         plot.caption = element_text(size = 7)) 
+         plot.caption = element_text(size = 7),
+         panel.grid.major.y = element_blank() ) 
 
 
 
@@ -415,7 +415,8 @@ autoplot(mapLatLon) +
 
 ```{r no.allocation, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height= 4, size="small"}
 
-autoplot(mapLatLon) +
+#autoplot(mapLatLon) +
+ggplot() + 
   geom_polygon(data = campdistrict.map.fort,
                aes(x = long, y = lat, 
                    fill = round(predicted.target.no.allocation,2) , group = group),
@@ -460,7 +461,8 @@ autoplot(mapLatLon) +
          axis.text.y = element_blank(),
          axis.ticks = element_blank(),
          axis.title.x = element_blank(),
-         axis.title.y = element_blank())  
+         axis.title.y = element_blank(),
+         panel.grid.major.y = element_blank() )  
 
 
 ```
@@ -469,7 +471,8 @@ autoplot(mapLatLon) +
 
 ```{r reduced.allocation2, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height= 4,size="small"}
 
-autoplot(mapLatLon) +
+#autoplot(mapLatLon) +
+ggplot() + 
   geom_polygon(data = campdistrict.map.fort,
                aes(x = long, y = lat, 
                    fill = round(predicted.target.reduced.allocation,2) , group = group),
@@ -514,7 +517,8 @@ autoplot(mapLatLon) +
          axis.text.y = element_blank(),
          axis.ticks = element_blank(),
          axis.title.x = element_blank(),
-         axis.title.y = element_blank()) 
+         axis.title.y = element_blank(),
+         panel.grid.major.y = element_blank() ) 
 
 
 
@@ -524,7 +528,8 @@ autoplot(mapLatLon) +
 
 ```{r full.allocation, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height= 4,size="small"}
 
-autoplot(mapLatLon) +
+#autoplot(mapLatLon) +
+ggplot() + 
   geom_polygon(data = campdistrict.map.fort,
                aes(x = long, y = lat, 
                    fill = round(predicted.target.full.allocation,2) , group = group),
@@ -569,7 +574,8 @@ autoplot(mapLatLon) +
          axis.text.y = element_blank(),
          axis.ticks = element_blank(),
          axis.title.x = element_blank(),
-         axis.title.y = element_blank()) 
+         axis.title.y = element_blank(),
+         panel.grid.major.y = element_blank() ) 
 
 
 ```
@@ -579,7 +585,8 @@ autoplot(mapLatLon) +
 
 ```{r could.not.calculate, echo=FALSE, warning=FALSE, cache=FALSE, tidy = TRUE, message=FALSE, comment = "", fig.height= 4,size="small"}
 
-autoplot(mapLatLon) +
+#autoplot(mapLatLon) +
+ggplot() + 
   geom_polygon(data = campdistrict.map.fort,
                aes(x = long, y = lat, 
                    fill = round(predicted.target.could.not.calculate,2) , group = group),
@@ -624,7 +631,8 @@ autoplot(mapLatLon) +
          axis.text.y = element_blank(),
          axis.ticks = element_blank(),
          axis.title.x = element_blank(),
-         axis.title.y = element_blank()) 
+         axis.title.y = element_blank(),
+         panel.grid.major.y = element_blank() ) 
 ```
 
 
