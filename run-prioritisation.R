@@ -69,8 +69,8 @@ data.no$predicted.target.centile <- ntile(data.no$predicted.prob, 100)
 data.no$predicted.target.sub <- ifelse(data.no$predicted.target.centile >= 39, "no.top39pc","no.tail61pc")
 
 datasub <- rbind(data.no, data.full, data.reduc)
-datasub <- datasub[ ,c("caseNo", "predicted.target.sub")]
-cases2target <- merge( x = cases2target, y = datasub, by = "caseNo", all.x = TRUE )
+datasub <- datasub[ ,c("CaseNo", "predicted.target.sub")]
+cases2target <- merge( x = cases2target, y = datasub, by = "CaseNo", all.x = TRUE )
 
 
 prop.table(table(forest_prediction$predicted.target, useNA = "ifany"))
