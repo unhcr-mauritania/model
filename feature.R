@@ -175,6 +175,7 @@ prop.table(table(cases$single.parent, useNA = "ifany"))
 
 ####################################################################################################
 ## Extracting Number of times of HHs absentees GFD
+
 table(cases$AST36, useNA = "ifany")
 table(cases$AST36, useNA = "ifany")
 prop.table(table(cases$AST36, useNA = "ifany"))
@@ -196,17 +197,53 @@ cases$AbsenteesGFD2.discrete <- cut(cases$AbsenteesGFD2,
 #cases$AbsenteesGFD2 <- as.factor(cases$AbsenteesGFD2.discrete)
 prop.table(table(cases$AbsenteesGFD2.discrete, useNA = "ifany"))
 
+####################################################################################################
+## Feature engineering for properties
+
+cases$possede_voiture1 <- ifelse(cases$possede_voiture > 0, "yes", "no")
+cases$possede_moto1 <- ifelse(cases$possede_moto > 0, "yes", "no")
+cases$possede_Charrette1 <- ifelse(cases$possede_Charrette > 0, "yes", "no")
+cases$possede_panneaux1 <- ifelse(cases$possede_panneaux > 0, "yes", "no")
+cases$possede_Bijoux1 <- ifelse(cases$possede_Bijoux > 0, "yes", "no")
+cases$possede_Radio1  <- ifelse(cases$possede_Radio > 0, "yes", "no")
+cases$possede_Ordinateur1  <- ifelse(cases$possede_Ordinateur > 0, "yes", "no")
+cases$possede_Meuble1  <- ifelse(cases$possede_Meuble > 0, "yes", "no")
+
+
+cases$possede_asins1 <- ifelse(cases$possede_camelin >= 1,     "yes",  "no" )
+
+psum <- function(..., na.rm=FALSE) {
+          x <- list(...)
+          rowSums(matrix(unlist(x), ncol = length(x)), na.rm = na.rm)
+        }
+
+
+cases$possede_ovincaprin1 <- cut(psum(cases$possede_ovin, cases$possede_caprin, na.rm = TRUE),
+                           breaks = c(-1,0, 2, 3, 100000), include.lowest = TRUE ,
+                           labels = c("4.No", "3.One.or.two", "2.Three", "1.Four.and.over"))
+
+cases$possede_caprin1 <- ifelse(cases$possede_caprin >= 1,     "yes",  "no" )
+cases$possede_bovincamelin1  <- cut(psum(cases$possede_bovin, cases$possede_camelin, na.rm = TRUE),
+                             breaks = c(-1,0, 1, 2, 100000), include.lowest = TRUE ,
+                             labels = c("4.no", "3.one", "2.two", "1.morethan.two"))
+
+cases$possede_camelin1 <- ifelse(cases$possede_camelin >= 1,     "yes",  "no" )
+cases$possede_camelin2 <- ifelse(cases$possede_camelin >= 2,     "yes",  "no" )
+
 
 ####################################################################################################
 ## Subset data ready for analysis
 
 colNames <- colnames(cases)
-propertyCols <- colNames[grep(pattern = "possede_" , colNames)]
+propertyCols <- c( "possede_voiture1", "possede_moto1", "possede_Charrette1", "possede_panneaux1", "possede_Bijoux1",
+                  "possede_Radio1", "possede_Ordinateur1", "possede_Meuble1",
+                  "possede_asins1", "possede_ovincaprin1", "possede_caprin1", "possede_bovincamelin1", "possede_camelin1", "possede_camelin21")
+
 revenueCol_1 <- colNames[grep(pattern = "Revenue1_" , colNames)]
 revenueCol_2 <- colNames[grep(pattern = "Revenue2_" , colNames)]
 
 
-cases2 <- cases [ , c (c ("CaseNo",
+cases2 <- cases [ , c(   c("CaseNo",
                           ## Featured characteristics
                           "familyprofile",
                           "Case.size",
@@ -225,16 +262,31 @@ cases2 <- cases [ , c (c ("CaseNo",
                           #"coal5id",
                           ## Socio-Eco - Data
                           ## Occupation
-                          "Manager" , "Professional" , "Technician" , "Clerk" , "ServiceMarket" , "Agricultural"
-                          , "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown",
-                          "AbsenteesGFD2.discrete") , propertyCols , revenueCol_1 , revenueCol_2) ]
+                          "Manager" , "Professional" , "Technician" , "Clerk" , "ServiceMarket" ,
+                          "Agricultural", "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown",
+
+                          "AbsenteesGFD2.discrete",
+
+                          # Property
+                          "possede_voiture1", "possede_moto1", "possede_Charrette1", "possede_panneaux1", "possede_Bijoux1",
+                          "possede_Radio1", "possede_Ordinateur1", "possede_Meuble1",
+                          "possede_asins1", "possede_ovincaprin1", "possede_caprin1", "possede_bovincamelin1",
+                          "possede_camelin1", "possede_camelin2") ,
+                         revenueCol_1 , revenueCol_2) ]
 
 ## Remove variable with too little info
 prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
 
 cases2[ , prostitutionCols] <- list(NULL)
 
+
+### Quick overview of tabulation
+for (i in 1:ncol(cases2)) {
+  table(cases[ ,1], useNA = "always")
+}
+
+
 #str(cases2)
-rm(prostitutionCols, propertyCols,revenueCol_1, revenueCol_2,colNames  )
+rm(prostitutionCols, revenueCol_1, revenueCol_2,colNames  )
 
 
