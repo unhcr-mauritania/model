@@ -1,7 +1,7 @@
 
 #install.packages("RODBC")
 library(RODBC)
-
+library(dplyr)
 #########################################
 ## Db handle for proGres Registration
 #########################################
@@ -25,14 +25,14 @@ capacity2 <- sqlQuery(dbhandleprogres, query4)
 capacity3 <- sqlQuery(dbhandleprogres, query5)
 specificneeds <- sqlQuery(dbhandleprogres, query6)
 AbsenteesGFD <- sqlQuery(dbhandleprogres, query7)
-
+dataVerified <- sqlQuery(dbhandleprogres, query8)
 
 names(AbsenteesGFD)
+
 cases <- merge( x = dependency, y = Property, by = "CaseNo" )
 cases <- merge( x = cases, y = capacity1, by = "CaseNo" )
 cases <- merge( x = cases, y = capacity2, by = "CaseNo" )
 cases <- merge( x = cases, y = capacity3, by = "CaseNo" )
-
 
 ## install.packages("reshape2")
 library(reshape2)

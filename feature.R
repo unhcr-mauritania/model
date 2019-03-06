@@ -277,6 +277,7 @@ cases2 <- cases [ , c(   c("CaseNo",
 ## Remove variable with too little info
 prostitutionCols <- colNames[grep(pattern = "*_Prostitution" , colNames)]
 
+
 cases2[ , prostitutionCols] <- list(NULL)
 
 
@@ -287,6 +288,64 @@ for (i in 1:ncol(cases2)) {
 
 
 #str(cases2)
+#rm(prostitutionCols, revenueCol_1, revenueCol_2,colNames  )
+
+
+#cases_to_be_nulled <- cases2 %>% filter(Revenue1_Sell_Agriculture_Prod =='no' & Revenue1_Salari == 'no' & Revenue1_transfer_from_abroad =='no' &
+#                                          Revenue1_Borrowing =='no' & Revenue1_Begging =='no' & Revenue1_Sell_Assistance =='no' &
+#                                          Revenue1_Work_for_Humanitarian_Org =='no' & Revenue1_Transfer =='no' & Revenue1_Cash_transfer_state =='no' &
+#                                          Revenue2_Sell_Agriculture_Prod =='no' & Revenue2_Salari =='no' & Revenue2_transfer_from_abroad =='no' &
+#                                          Revenue2_Borrowing =='no' & Revenue2_Begging =='no' & Revenue2_Sell_Assistance =='no' &
+#                                          Revenue2_Work_for_Humanitarian_Org =='no' & Revenue2_Transfer =='no' & 
+#                                          Revenue2_Cash_transfer_state =='no' & possede_voiture1  == 'no' &
+#                                          possede_moto1 == 'no' & possede_Charrette1 == 'no' & possede_panneaux1 == 'no' & 
+#                                          possede_Bijoux1 == 'no' & possede_Radio1 == 'no' & possede_Ordinateur1 == 'no' & 
+#                                          possede_Meuble1 == 'no' & possede_asins1 == 'no' & possede_ovincaprin1 == '4.No' &
+#                                          possede_caprin1 == 'no' & possede_bovincamelin1 == '4.no' & possede_camelin1 == 'no' &
+#                                          possede_camelin2 == 'no'  )
+#cases_to_be_preserved <- cases2 %>% anti_join(cases_to_be_nulled , by="CaseNo")
+
+propertyCol <- colNames[grep(pattern = "possede_" , colNames)]
+
+cases_to_be_nulled <- cases2 %>% anti_join(dataVerified , by="CaseNo")
+cases_to_be_preserved <- cases2 %>% anti_join(cases_to_be_nulled , by="CaseNo")
+
+
+for (i in 1:length(revenueCol_1)) {
+  cases_to_be_nulled [ , revenueCol_1[! revenueCol_1 %in% 'Revenue1_Prostitution']] <- NA
+}
+
+
+for (i in 1:length(revenueCol_2)) {
+  cases_to_be_nulled [ , revenueCol_2[! revenueCol_2 %in% 'Revenue2_Prostitution']] <- NA
+}
+
+
+cases_to_be_nulled [ , "possede_voiture1"] <- NA
+cases_to_be_nulled [ , "possede_moto1"] <- NA
+cases_to_be_nulled [ , "possede_Charrette1"] <- NA
+cases_to_be_nulled [ , "possede_panneaux1"] <- NA
+cases_to_be_nulled [ , "possede_Bijoux1"] <- NA
+cases_to_be_nulled [ , "possede_Radio1"] <- NA
+cases_to_be_nulled [ , "possede_Ordinateur1"] <- NA
+cases_to_be_nulled [ , "possede_Meuble1"] <- NA
+cases_to_be_nulled [ , "possede_asins1"] <- NA
+cases_to_be_nulled [ , "possede_ovincaprin1"] <- NA
+cases_to_be_nulled [ , "possede_caprin1"] <- NA
+cases_to_be_nulled [ , "possede_bovincamelin1"] <- NA
+
+cases_to_be_nulled [ , "possede_camelin1"] <- NA
+cases_to_be_nulled [ , "possede_camelin2"] <- NA
+
+
+
+cases2 <- bind_rows(cases_to_be_preserved , cases_to_be_nulled)
+
+
 rm(prostitutionCols, revenueCol_1, revenueCol_2,colNames  )
+
+
+
+
 
 

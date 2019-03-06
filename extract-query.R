@@ -25,6 +25,7 @@ query1 <- removeLineBreak(
   INNER JOIN dbo.dataIndividualProcessGroup AS IPGG ON PP.ProcessingGroupGUID = IPGG.ProcessingGroupGUID
   INNER JOIN dbo.dataIndividual AS II ON IPGG.IndividualGUID = II.IndividualGUID
   WHERE ProcessStatusCode IN('A') GROUP BY ProcessingGroupNumber " )
+  
 
 
 ##Property  
@@ -153,7 +154,7 @@ query4 <- removeLineBreak("Select I.IndividualGUID , P.ProcessingGroupNumber Cas
                           INNER JOIN dbo.dataIndividualProcessGroup AS IPG ON P.ProcessingGroupGUID = IPG.ProcessingGroupGUID
                           INNER JOIN dbo.dataIndividual AS I ON IPG.IndividualGUID = I.IndividualGUID 
                           LEFT OUTER JOIN dbo.dataIndividualSoftFields soft on I.IndividualGUID = soft.IndividualGUID
-                          WHERE I.ProcessStatusCode = 'A' AND IPG.PrincipalRepresentative = 1")
+                          WHERE I.ProcessStatusCode = 'A' AND IPG.PrincipalRepresentative = 1 ")
 
 
 ## Soft field 3 , Moyen D'existence 
@@ -184,7 +185,7 @@ query6 <- removeLineBreak ("SELECT
                            INNER JOIN dbo.dataIndividual AS II ON I.IndividualGUID = II.IndividualGUID
                            INNER JOIN dbo.dataIndividualProcessGroup AS IPG ON IPG.IndividualGUID = II.IndividualGUID
                            INNER JOIN dbo.dataProcessGroup AS P  ON P.ProcessingGroupGUID = IPG.ProcessingGroupGUID
-                           WHERE I.VulnerabilityActive = 1")
+                           WHERE I.VulnerabilityActive = 1 ")
 
 
 ## Query 4: Information on absentees during GFD
@@ -193,3 +194,13 @@ query7 <- removeLineBreak ("SELECT dataProcessGroup.ProcessingGroupNumber  CaseN
                            FROM  dataEventLog INNER JOIN
                            dataProcessGroup ON dataEventLog.ProcessingGroupGUID = dataProcessGroup.ProcessingGroupGUID
                            WHERE (dataEventLog.EventID = N'AST36') AND (dataEventLog.EventLogstatus = N'c')")
+
+## Query 6 : Data Verified
+query8 <- removeLineBreak ("Select I.IndividualGUID , P.ProcessingGroupNumber CaseNo
+                            from 
+                            dbo.dataProcessGroup AS P
+                            INNER JOIN dbo.dataIndividualProcessGroup AS IPG ON P.ProcessingGroupGUID = IPG.ProcessingGroupGUID
+                            INNER JOIN dbo.dataIndividual AS I ON IPG.IndividualGUID = I.IndividualGUID 
+                            LEFT OUTER JOIN dbo.dataIndividualSoftFields soft on I.IndividualGUID = soft.IndividualGUID
+                            WHERE I.ProcessStatusCode = 'A' AND IPG.PrincipalRepresentative = 1 and I.IndividualGUID in 
+                            (Select IndividualGUID from dataEventLog where EventID = 'REG46')")
