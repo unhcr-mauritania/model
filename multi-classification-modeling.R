@@ -136,7 +136,7 @@ cat("Joining on table from survey with observed vulnerability category. \n")
 
 #library(randomForest)
 forest_model <- randomForest(unconditionnal2 ~ ., data = train_table_na,
-                             nTree = 8,
+                             nTree = 15,
                              maxDepth = 32,
                              mTry = 35,
                              na.action = na.omit,

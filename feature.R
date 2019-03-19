@@ -1,4 +1,6 @@
 
+library('dplyr')
+
 ####################################################################################################
 ## Family Profile
 cases$familyprofile <- ""
@@ -16,7 +18,7 @@ prop.table(table(as.factor(cases$Num_Inds), useNA = "ifany"))
 prop.table(table(cut(cases$Num_Inds,   breaks = c(0,1,2,3,4,6,50),include.lowest = TRUE)))
 #rm(Case.size)
 cases$Case.size <- cut(cases$Num_Inds,
-                       breaks = c(0,1,2,3,4,6,50),
+                       breaks = c(0,1,2,3,4,5,50),
                        labels = c("Case.size.1", "Case.size.2", "Case.size.3", "Case.size.4",
                                   "Case.size.5", "Case.size.6.or.more"),include.lowest = TRUE)
 
@@ -80,21 +82,21 @@ cases$YearArrivalCat <- cut(cases$YearArrival, breaks = c(0,2012,2013,2016,2017,
 prop.table(table(cases$edu_highest, useNA = "ifany"))
 
 cases$educat <- as.character(cases$edu_highest)
-cases$educat[cases$educat == "KG"] <- "Formal Education" # "Kindergarten"
-cases$educat[cases$educat == "01"] <- "Formal Education" # "Grade 1"
-cases$educat[cases$educat == "02"] <- "Formal Education" # "Grade 2"
-cases$educat[cases$educat == "03"] <- "Formal Education" # "Up to Grade 5" # "Grade 3"
-cases$educat[cases$educat == "04"] <- "Formal Education" #"Up to Grade 5" # "Grade 4"
-cases$educat[cases$educat == "05"] <- "Formal Education" #"Up to Grade 5" # "Grade 5"
-cases$educat[cases$educat == "06"] <- "Formal Education" #"Grade 6-8" # "Grade 6"
-cases$educat[cases$educat == "07"] <- "Formal Education" #"Grade 6-8" # "Grade 7"
-cases$educat[cases$educat == "08"] <- "Formal Education" #"Grade 6-8" # "Grade 8"
-cases$educat[cases$educat == "09"] <- "Formal Education" #"Grade 9-11" # "Grade 9"
-cases$educat[cases$educat == "10"] <- "Formal Education" #"Grade 9-11" #"Grade 10"
-cases$educat[cases$educat == "11"] <- "Formal Education" #"Grade 9-11" #"Grade 11"
-cases$educat[cases$educat == "12"] <- "Formal Education" #"Grade 12-14" #"Grade 12"
-cases$educat[cases$educat == "13"] <- "Formal Education" #"Grade 12-14" #"Grade 13"
-cases$educat[cases$educat == "14"] <- "Formal Education" #"Grade 12-14" #"Grade 14"
+cases$educat[cases$educat == "KG"] <- "Kindergarten" # "Kindergarten"
+cases$educat[cases$educat == "01"] <- "Primary" # "Grade 1"
+cases$educat[cases$educat == "02"] <- "Primary" # "Grade 2"
+cases$educat[cases$educat == "03"] <- "Primary" # "Up to Grade 5" # "Grade 3"
+cases$educat[cases$educat == "04"] <- "Primary" #"Up to Grade 5" # "Grade 4"
+cases$educat[cases$educat == "05"] <- "Primary" #"Up to Grade 5" # "Grade 5"
+cases$educat[cases$educat == "06"] <- "Primary" #"Grade 6-8" # "Grade 6"
+cases$educat[cases$educat == "07"] <- "Secondary" #"Grade 6-8" # "Grade 7"
+cases$educat[cases$educat == "08"] <- "Secondary" #"Grade 6-8" # "Grade 8"
+cases$educat[cases$educat == "09"] <- "Secondary" #"Grade 9-11" # "Grade 9"
+cases$educat[cases$educat == "10"] <- "High school" #"Grade 9-11" #"Grade 10"
+cases$educat[cases$educat == "11"] <- "High school" #"Grade 9-11" #"Grade 11"
+cases$educat[cases$educat == "12"] <- "High school" #"Grade 12-14" #"Grade 12"
+cases$educat[cases$educat == "13"] <- "High school" #"Grade 12-14" #"Grade 13"
+cases$educat[cases$educat == "14"] <- "High school" #"Grade 12-14" #"Grade 14"
 cases$educat[cases$educat == "IN"] <- "Informal Education"
 cases$educat[cases$educat == "NE"] <- "No education"
 cases$educat[cases$educat == "U"] <- "Unknown"
@@ -187,7 +189,7 @@ prop.table(table(cases$AbsenteesGFD2, useNA = "ifany"))
 cases$AbsenteesGFD2 <- as.numeric(cases$AbsenteesGFD2)
 str(cases$AbsenteesGFD2)
 
-hist(cases$AbsenteesGFD2)
+#hist(cases$AbsenteesGFD2)
 
 cases$AbsenteesGFD2.discrete <- cut(cases$AbsenteesGFD2,
                                     breaks = c(-1, 0, 1, 60),
@@ -219,16 +221,61 @@ psum <- function(..., na.rm=FALSE) {
 
 
 cases$possede_ovincaprin1 <- cut(psum(cases$possede_ovin, cases$possede_caprin, na.rm = TRUE),
-                           breaks = c(-1,0, 2, 3, 100000), include.lowest = TRUE ,
-                           labels = c("4.No", "3.One.or.two", "2.Three", "1.Four.and.over"))
+                          breaks = c(-1,0, 5 , 20 , 100000), include.lowest = TRUE ,
+                         labels = c("4.No", "3.One.to.five" , "2.five.to.twenty" , "1.twenty.and.over"))
 
-cases$possede_caprin1 <- ifelse(cases$possede_caprin >= 1,     "yes",  "no" )
+#cases$possede_ovincaprin1 <- cut(psum(cases$possede_ovin, cases$possede_caprin, na.rm = TRUE),
+ #                                breaks = c(-1,0, 5, 10, 100000), include.lowest = TRUE ,
+  #                               labels = c("4.No", "3.One.to.Five", "2.Five.to.ten", "1.Ten.and.over"))
+
+
+cases$possede_caprin1 <- ifelse(cases$possede_caprin >= 1, "yes",  "no" )
+#cases$possede_bovincamelin1  <- cut(psum(cases$possede_bovin, cases$possede_camelin, na.rm = TRUE),
+ #                            breaks = c(-1,0, 1, 2, 100000), include.lowest = TRUE ,
+  #                           labels = c("4.no", "3.one", "2.two", "1.morethan.two"))
+
+
 cases$possede_bovincamelin1  <- cut(psum(cases$possede_bovin, cases$possede_camelin, na.rm = TRUE),
-                             breaks = c(-1,0, 1, 2, 100000), include.lowest = TRUE ,
-                             labels = c("4.no", "3.one", "2.two", "1.morethan.two"))
+                            breaks = c(-1,0, 5, 20, 100000), include.lowest = TRUE ,
+                            labels = c("4.No", "3.One.to.Five", "2.five.to.twenty", "1.twenty.and.over"))
 
 cases$possede_camelin1 <- ifelse(cases$possede_camelin >= 1,     "yes",  "no" )
 cases$possede_camelin2 <- ifelse(cases$possede_camelin >= 2,     "yes",  "no" )
+
+
+####################################################################################################
+## adjust OvinCaprin to capture Interaction with dependency ration , female HH , 
+
+cases$intersection_ovincaprin1_SPNeeds <- cases$possede_ovincaprin1
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(dependency == "4.majority.dependant" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse((Case.size == "Case.size.5" | Case.size == "Case.size.6.or.more" ) & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(female.ratio == "5.all.female" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(female.ratio == "4.most.female" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(single.parent == "yes" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(dem_sex == "F" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(Disabled == "yes" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(Single.Child == "yes" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(Elder == "yes" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(Serious.medical.needs == "yes" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse((dem_agegroup == "A2" | dem_agegroup == "A3") & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse((dem_marriagecat == "Widowed" | dem_marriagecat == "Divorced-Separated-Unknown") & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(Child.at.risk == "yes" & possede_ovincaprin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_ovincaprin1_SPNeeds) ))
+
+
+cases$intersection_bovincamelin1_SPNeeds <- cases$possede_bovincamelin1
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(dependency == "4.majority.dependant" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((Case.size == "Case.size.5" | Case.size == "Case.size.6.or.more" ) & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(female.ratio == "5.all.female" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(female.ratio == "4.most.female" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(single.parent == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(dem_sex == "F" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Disabled == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Single.Child == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Elder == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Serious.medical.needs == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((dem_agegroup == "A2" | dem_agegroup == "A3") & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((dem_marriagecat == "Widowed" | dem_marriagecat == "Divorced-Separated-Unknown") & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Child.at.risk == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
 
 
 ####################################################################################################
@@ -250,7 +297,9 @@ cases2 <- cases [ , c(   c("CaseNo",
                           "dependency" ,
                           "female.ratio",
                           "dem_marriagecat" ,
-                          "agecohort",
+                          "dem_sex",
+                          "dem_agegroup",
+                          #"agecohort",
                           "YearArrivalCat" ,
                           "educat" ,
                           "Child.at.risk",
@@ -266,12 +315,10 @@ cases2 <- cases [ , c(   c("CaseNo",
                           "Agricultural", "Craft" , "Machine" , "Elementary" , "NoOccup_or_Unkown",
 
                           "AbsenteesGFD2.discrete",
-
                           # Property
                           "possede_voiture1", "possede_moto1", "possede_Charrette1", "possede_panneaux1", "possede_Bijoux1",
                           "possede_Radio1", "possede_Ordinateur1", "possede_Meuble1",
-                          "possede_asins1", "possede_ovincaprin1", "possede_caprin1", "possede_bovincamelin1",
-                          "possede_camelin1", "possede_camelin2") ,
+                          "possede_asins1", "intersection_ovincaprin1_SPNeeds", "intersection_bovincamelin1_SPNeeds") ,
                          revenueCol_1 , revenueCol_2) ]
 
 ## Remove variable with too little info
@@ -330,12 +377,13 @@ cases_to_be_nulled [ , "possede_Radio1"] <- NA
 cases_to_be_nulled [ , "possede_Ordinateur1"] <- NA
 cases_to_be_nulled [ , "possede_Meuble1"] <- NA
 cases_to_be_nulled [ , "possede_asins1"] <- NA
-cases_to_be_nulled [ , "possede_ovincaprin1"] <- NA
-cases_to_be_nulled [ , "possede_caprin1"] <- NA
-cases_to_be_nulled [ , "possede_bovincamelin1"] <- NA
+#cases_to_be_nulled [ , "possede_ovincaprin1"] <- NA
+#cases_to_be_nulled [ , "possede_caprin1"] <- NA
+cases_to_be_nulled [ , "intersection_bovincamelin1_SPNeeds"] <- NA
+cases_to_be_nulled [ , "intersection_ovincaprin1_SPNeeds"] <- NA
 
-cases_to_be_nulled [ , "possede_camelin1"] <- NA
-cases_to_be_nulled [ , "possede_camelin2"] <- NA
+#cases_to_be_nulled [ , "possede_camelin1"] <- NA
+#cases_to_be_nulled [ , "possede_camelin2"] <- NA
 
 
 
