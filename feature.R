@@ -263,19 +263,19 @@ cases <- mutate(cases , intersection_ovincaprin1_SPNeeds = ifelse(Child.at.risk 
 
 
 cases$intersection_bovincamelin1_SPNeeds <- cases$possede_bovincamelin1
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(dependency == "4.majority.dependant" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(dependency == "4.majority.dependant" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
 cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((Case.size == "Case.size.5" | Case.size == "Case.size.6.or.more" ) & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(female.ratio == "5.all.female" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(female.ratio == "4.most.female" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(single.parent == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(dem_sex == "F" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Disabled == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Single.Child == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Elder == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Serious.medical.needs == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((dem_agegroup == "A2" | dem_agegroup == "A3") & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((dem_marriagecat == "Widowed" | dem_marriagecat == "Divorced-Separated-Unknown") & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
-cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Child.at.risk == "yes" & possede_bovincamelin1 == "3.One.to.five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(female.ratio == "5.all.female" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(female.ratio == "4.most.female" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(single.parent == "yes" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(dem_sex == "F" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Disabled == "yes" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Single.Child == "yes" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Elder == "yes" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Serious.medical.needs == "yes" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((dem_agegroup == "A2" | dem_agegroup == "A3") & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse((dem_marriagecat == "Widowed" | dem_marriagecat == "Divorced-Separated-Unknown") & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
+cases <- mutate(cases , intersection_bovincamelin1_SPNeeds = ifelse(Child.at.risk == "yes" & possede_bovincamelin1 == "3.One.to.Five"  ,  yes = "4.No" , no = as.character(intersection_bovincamelin1_SPNeeds) ))
 
 
 ####################################################################################################
@@ -295,7 +295,7 @@ cases2 <- cases [ , c(   c("CaseNo",
                           "familyprofile",
                           "Case.size",
                           "dependency" ,
-                          "female.ratio",
+                          "female.ratio", 
                           "dem_marriagecat" ,
                           "dem_sex",
                           "dem_agegroup",
